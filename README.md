@@ -1,4 +1,4 @@
-# mall-pro 
+# mall-pro
 
 ## Project setup
 ```
