@@ -1,0 +1,15 @@
+.clearfix {
+    .same() {
+        content: '';
+        display: table;
+    }
+
+    &::before {
+        .same();
+    }
+
+    &::after {
+        .same();
+        clear: both;
+    }
+}
