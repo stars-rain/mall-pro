@@ -1,6 +1,6 @@
 <template>
   <div class="mall-header">
-    <div class="mall-header__container">
+    <div class="mall-header__container clearfix">
       <a
         href="javascript:void(0)"
         class="header-nav header__index"
@@ -89,6 +89,9 @@ const refresh: () => void = (): void => router.go(0);
 
         &-cart {
           .catlogreg();
+          background-color: #424242;
+          padding: 0 10px;
+          margin: 0 20px;
         }
       }
     }
