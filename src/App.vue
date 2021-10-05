@@ -9,6 +9,3 @@ export default defineComponent({
   name: "App",
 });
 </script>
-
-<style lang="less" scoped>
-</style>
