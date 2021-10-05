@@ -126,7 +126,7 @@ const refresh: () => void = (): void => router.go(0);
         top: 40px;
         right: 0;
         width: 316px;
-        background-color: #fff;
+        background-color: extract(@colors, 4);
         box-shadow: 0 2px 10px rgb(0 0 0 / 15%);
         overflow: hidden;
         z-index: 110;
