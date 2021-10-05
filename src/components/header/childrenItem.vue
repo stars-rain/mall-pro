@@ -42,6 +42,8 @@ export default defineComponent({
   box-shadow: 0 15px 10px -15px rgb(0 0 0 / 10%);
   top: 100px;
   left: 0;
+  background-color: extract(@colors, 4);
+  z-index: 100;
 
   &__container {
     width: @width;
