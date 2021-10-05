@@ -1,7 +1,9 @@
 <template>
   <div class="mall-header">
     <!-- 商城头部组件 -->
-    <mall-header></mall-header>
+    <div class="header-container clearfix">
+      <mall-header></mall-header>
+    </div>
   </div>
 </template>
 
@@ -22,6 +24,13 @@ export default defineComponent({
   &-header {
     height: 40px;
     background-color: extract(@colors, 1);
+
+    .header {
+      &-container {
+        width: @width;
+        margin: 0 auto;
+      }
+    }
   }
 }
 </style>
