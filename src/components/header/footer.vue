@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="footer clearfix">
+  <div class="footer-container">
+    <div class="footer clearfix container">
       <div class="footer-logo">
         <a class="logo" href="javascript:void(0)" @click="refresh"></a>
       </div>
@@ -102,54 +102,53 @@ watch(
   width: 56px;
   height: 56px;
 }
-.container {
-  position: relative;
 
-  .footer {
-    width: @width;
-    height: 100px;
-    margin: 0 auto;
+.footer {
+  height: 100px;
 
-    &-logo {
-      position: relative;
-      margin-top: 28px;
+  &-container {
+    position: relative;
+  }
+
+  &-logo {
+    position: relative;
+    margin-top: 28px;
+    .widHei();
+    float: left;
+    .logo {
       .widHei();
-      float: left;
-      .logo {
+      &::before {
+        content: "";
+        background: url("~@/assets/logo.png") no-repeat;
+        background-size: 56px;
+        position: absolute;
+        top: 0;
         .widHei();
-        &::before {
-          content: "";
-          background: url("~@/assets/logo.png") no-repeat;
-          background-size: 56px;
-          position: absolute;
-          top: 0;
-          .widHei();
-          transform: translateZ(0);
-        }
+        transform: translateZ(0);
       }
     }
+  }
 
-    &-types {
-      margin: 12px 0 0 250px;
+  &-types {
+    margin: 12px 0 0 250px;
 
-      & > ul {
-        width: 620px;
-      }
+    & > ul {
+      width: 620px;
+    }
 
-      .commodity {
-        &-type {
-          &:hover {
-            & > a {
-              color: extract(@colors, 3);
-            }
-          }
-
+    .commodity {
+      &-type {
+        &:hover {
           & > a {
-            color: extract(@colors, 1);
-            line-height: 88px;
-            padding: 0 20px;
-            transition: color 0.3s;
+            color: extract(@colors, 3);
           }
+        }
+
+        & > a {
+          color: extract(@colors, 1);
+          line-height: 88px;
+          padding: 0 20px;
+          transition: color 0.3s;
         }
       }
     }
