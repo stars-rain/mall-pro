@@ -1,23 +1,25 @@
 <template>
-  <a
-    href="javascript:void(0)"
-    class="header-nav header-nav__index"
-    @click="refresh"
-    >小米商城</a
-  >
-  <div class="header-cart">
-    <router-link class="cart-nav" to="/">
-      <svg-icon popper-class="icon-cart" icon-class="cart"></svg-icon>
-      <span class="cart-hint">购物车 (0) </span>
-    </router-link>
-    <div class="cart-datas">
-      <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
+  <div class="container clearfix">
+    <a
+      href="javascript:void(0)"
+      class="header-nav header-nav__index"
+      @click="refresh"
+      >小米商城</a
+    >
+    <div class="header-cart">
+      <router-link class="cart-nav" to="/">
+        <svg-icon popper-class="icon-cart" icon-class="cart"></svg-icon>
+        <span class="cart-hint">购物车 (0) </span>
+      </router-link>
+      <div class="cart-datas">
+        <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
+      </div>
     </div>
-  </div>
-  <div class="header-logreg">
-    <router-link class="header-nav" to="/">登录</router-link>
-    <span class="sep">|</span>
-    <router-link class="header-nav" to="/">注册</router-link>
+    <div class="header-logreg">
+      <router-link class="header-nav" to="/">登录</router-link>
+      <span class="sep">|</span>
+      <router-link class="header-nav" to="/">注册</router-link>
+    </div>
   </div>
   <header-footer></header-footer>
 </template>
