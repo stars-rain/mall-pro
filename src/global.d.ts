@@ -21,3 +21,9 @@ declare type CommodityTypes = {
     title: string; // 头部商品分类导航的标题 (如： 手机、电视等)
     products: Array<commodity>; // 头部商品分类导航的标题属性的子数据
 }
+
+declare type Carousel = {
+    id: number;
+    url: string;
+    imgSrc: string;
+}
