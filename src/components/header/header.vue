@@ -6,14 +6,20 @@
       @click="refresh"
       >小米商城</a
     >
-    <div class="header-cart">
+    <div
+      class="header-cart"
+      @mouseover="showCart = true"
+      @mouseout="showCart = false"
+    >
       <router-link class="cart-nav" to="/">
         <svg-icon popper-class="icon-cart" icon-class="cart"></svg-icon>
         <span class="cart-hint">购物车 (0) </span>
       </router-link>
-      <div class="cart-datas">
-        <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
-      </div>
+      <collapse-transition>
+        <div class="cart-datas" v-show="showCart">
+          <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
+        </div></collapse-transition
+      >
     </div>
     <div class="header-logreg">
       <router-link class="header-nav" to="/">登录</router-link>
@@ -32,6 +38,11 @@ export default defineComponent({
   name: "header-index",
   components: {
     headerFooter,
+  },
+  data() {
+    return {
+      showCart: false, // 是否显示购物车
+    };
   },
 });
 </script>
@@ -89,10 +100,6 @@ const refresh: () => void = (): void => router.go(0);
         &-nav {
           color: extract(@colors, 3);
         }
-
-        &-datas {
-          height: 100px;
-        }
       }
     }
 
@@ -119,11 +126,10 @@ const refresh: () => void = (): void => router.go(0);
         top: 40px;
         right: 0;
         width: 316px;
-        height: 0;
         background-color: #fff;
         box-shadow: 0 2px 10px rgb(0 0 0 / 15%);
         overflow: hidden;
-        transition: height 0.3s;
+        z-index: 110;
       }
 
       &-empty {

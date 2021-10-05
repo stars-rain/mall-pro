@@ -10,7 +10,7 @@ class Transition {
     constructor(public mode?: 'out-in' | 'in-out' | "default", public css?: boolean) { }
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     'onBefore-enter'(el: any): void {
-        if (el.getAttribute('data-before-active') !== '') return
+        if (el.getAttribute('data-before-active')) return
         el.classList.toggle('collapse-transition', true); // 给折叠动画的目标元素加入一个类名
         if (!el.data) el.data = {}; // 建立一个容器来保存目标元素的初始数据
 
@@ -22,7 +22,7 @@ class Transition {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     onEnter(el: any): void {
-        if (el.getAttribute('data-before-active') !== '') return
+        if (el.getAttribute('data-before-active')) return
         el.data.oldOverflow = el.style.overflow; // 保存目标元素的overflow属性
         el.style.overflow = 'hidden';
         if (el.scrollHeight) {
@@ -38,7 +38,7 @@ class Transition {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     'onAfter-enter'(el: any): void {
-        if (el.getAttribute('data-before-active') !== '') return
+        if (el.getAttribute('data-before-active')) return
         el.classList.toggle('collapse-transition', false); // 移除给折叠动画的目标元素加的类名
         el.style.height = ''; // el元素的style属性中不会显示height属性
         el.style.overflow = el.data.oldOverflow;
