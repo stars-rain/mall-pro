@@ -9,7 +9,7 @@
         }"
       >
       </a>
-    </li>
+    </li> 
     <carousel-bottom
       :datas-len="datasLen"
       :circleleft="circleleft"
