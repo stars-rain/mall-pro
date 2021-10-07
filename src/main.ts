@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
+import store, { key } from './store'
 import SvgIcon from '@/components/svgIcon/index.vue'// svg组件
 import {
   create,
@@ -19,7 +19,7 @@ const app = createApp(App);
 
 /* 注册svg图标组件和展开折叠动画组件 */
 app.component('svg-icon', SvgIcon).component('collapse-transition', collapseTransiton);
-app.use(store).use(router).use(native).use($axios).use($observer).mount('#app')
+app.use(store, key).use(router).use(native).use($axios).use($observer).mount('#app')
 
 /* 处理.svg文件 */
 const requireAll = (requireContext: any) => requireContext.keys().map(requireContext) //定义的一个遍历函数后面会调用
