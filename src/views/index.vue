@@ -9,9 +9,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeMount } from "vue";
+import { defineComponent } from "vue";
 import mallHeader from "@/components/header/header.vue";
-import mallHeaderCarousel from "@/components/header/carousel.vue";
+import mallHeaderCarousel from "@/components/header/carousel/index.vue";
+import { mapMutations } from "vuex";
 
 export default defineComponent({
   name: "index",
@@ -19,22 +20,20 @@ export default defineComponent({
     mallHeader,
     mallHeaderCarousel,
   },
-});
-</script>
-
-<script lang="ts" setup>
-import axios from "axios";
-
-/**
- * 头部轮播图数据
- */
-// eslint-disable-next-line no-undef
-const carouselData = ref<Array<Carousel>>([]);
-
-onBeforeMount(async () => {
-  /* 发送请求轮播图数据 */
-  const { data } = await axios.get("/slideshow");
-  carouselData.value = data;
+  computed: {
+    // 头部轮播图数据
+    // eslint-disable-next-line no-undef
+    carouselData(): Array<Carousel> {
+      return this.$store.state.carouselDatas;
+    },
+  },
+  methods: {
+    ...mapMutations(["getCommodityTypesDatas", "getCarouselDatas"]),
+  },
+  beforeMount() {
+    // 请求头部商品分类导航数据和轮播图数据
+    Promise.all([this.getCommodityTypesDatas(), this.getCarouselDatas()]);
+  },
 });
 </script>
 
