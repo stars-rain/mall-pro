@@ -8,7 +8,7 @@
         <ul @mouseleave="currentTitle = ''">
           <li
             class="commodity-type"
-            v-for="item in commodityTypesDatas"
+            v-for="item in currentDatas"
             :key="item.id"
             @mouseenter="handleToTitle(item.title)"
           >
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import childrenItem from "./childrenItem.vue";
 
 export default defineComponent({
@@ -42,29 +42,24 @@ export default defineComponent({
   components: {
     childrenItem,
   },
+  computed: {
+    // 头部商品分类导航数据
+    // eslint-disable-next-line no-undef
+    currentDatas(): Array<CommodityTypes> {
+      return this.$store.state.commodityTypesDatas;
+    },
+  },
 });
 </script>
 
 <script lang="ts" setup>
 import { useRouter } from "vue-router";
-import axios from "axios";
 
 const router = useRouter();
 /**
  * 刷新页面
  */
 const refresh: () => void = (): void => router.go(0);
-
-/**
- * @type {Array} 头部商品分类导航数据
- */
-// eslint-disable-next-line no-undef
-let commodityTypesDatas = ref<Array<CommodityTypes>>([]);
-/* 组件挂载前向后端请求头部商品分类导航数据 */
-onBeforeMount(async () => {
-  const { data } = await axios.get("/");
-  commodityTypesDatas.value = data;
-});
 
 /**
  * @type {string} 当前鼠标悬停在头部商品分类导航的类型
@@ -98,7 +93,7 @@ watch(
 .opacity-item {
   opacity: 0;
 }
-.widHei() {
+.widhei() {
   width: 56px;
   height: 56px;
 }
@@ -113,17 +108,17 @@ watch(
   &-logo {
     position: relative;
     margin-top: 28px;
-    .widHei();
+    .widhei();
     float: left;
     .logo {
-      .widHei();
+      .widhei();
       &::before {
         content: "";
         background: url("~@/assets/logo.png") no-repeat;
         background-size: 56px;
         position: absolute;
         top: 0;
-        .widHei();
+        .widhei();
         transform: translateZ(0);
       }
     }

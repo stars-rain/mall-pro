@@ -22,6 +22,10 @@ declare type CommodityTypes = {
     products: Array<commodity>; // 头部商品分类导航的标题属性的子数据
 }
 
+/**
+ * 轮播图数据接口
+ * @interface
+ */
 declare type Carousel = {
     id: number;
     url: string;
