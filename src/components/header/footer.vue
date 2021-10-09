@@ -93,10 +93,6 @@ watch(
 .opacity-item {
   opacity: 0;
 }
-.widhei() {
-  width: 56px;
-  height: 56px;
-}
 
 .footer {
   height: 100px;
@@ -108,17 +104,17 @@ watch(
   &-logo {
     position: relative;
     margin-top: 28px;
-    .widhei();
+    .setWidHei(56px, 56px);
     float: left;
     .logo {
-      .widhei();
+      .setWidHei(56px, 56px);
       &::before {
         content: "";
         background: url("~@/assets/logo.png") no-repeat;
         background-size: 56px;
         position: absolute;
         top: 0;
-        .widhei();
+        .setWidHei(56px, 56px);
         transform: translateZ(0);
       }
     }

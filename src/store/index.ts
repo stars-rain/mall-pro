@@ -23,7 +23,8 @@ export default createStore<State>({
   }),
   mutations: {
     /**
-     * @param state 得到头部商品分类导航数据
+     * 请求头部商品分类导航数据
+     * @param state - 根部state属性
      */
     async getCommodityTypesDatas(state): Promise<void> {
       try {
@@ -34,7 +35,7 @@ export default createStore<State>({
       }
     },
     /**
-     * @param state 头部轮播图数据
+     * @param state - 根部state属性
      */
     async getCarouselDatas(state): Promise<void> {
       try {

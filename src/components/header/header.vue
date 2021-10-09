@@ -104,8 +104,7 @@ const refresh: () => void = (): void => router.go(0);
     }
 
     .icon-cart {
-      width: 2em;
-      height: 2em;
+      .setWidHei(2em, 2em);
       vertical-align: middle;
     }
 
