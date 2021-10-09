@@ -79,7 +79,7 @@ const handleToId: (id: number) => void = (id: number): void => {
   timing.value = setTimeout(() => emit("startCarousel"), 4500); // 恢复轮播功能
 };
 onBeforeUnmount(() => {
-  clearTiming(); // 清除恢复轮播功能
+  clearTiming(); // 清除恢复轮播功能 
 });
 </script>
 
