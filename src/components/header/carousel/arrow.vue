@@ -49,7 +49,7 @@ const emit =
   defineEmits<{
     (e: "update:id", id: number): void;
     (e: "startCarousel"): void;
-    (e: "clearCarousel"): void;
+    (e: "clearCarousel"): void; 
   }>();
 
 /**
