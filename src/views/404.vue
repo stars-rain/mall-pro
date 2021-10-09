@@ -56,8 +56,7 @@ const goIndex: () => void = (): void => {
 
 <style lang="less" scoped>
 .not-found {
-  width: 80%;
-  height: 340px;
+  .setWidHei(80%, 340px);
   text-align: center;
   margin: 20vh auto;
   background: url("~@/assets/404.png") no-repeat right;
