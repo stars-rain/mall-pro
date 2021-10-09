@@ -1,9 +1,14 @@
-@width : 1226px;
-@colors: #333, #424242, #ff6700, #fff, rgb(220, 220, 224);
+@width    : 1226px;
+@arrowleft: 25px; // 轮播图左右切换箭头的左右外边距
+@colors   : #333,
+#424242,
+#ff6700,
+#fff,
+rgb(220, 220, 224);
 
-.widHei() {
-    width : 100%;
-    height: 100%;
+.setWidHei(@width, @height) {
+    width : @width;
+    height: @height;
 }
 
 .container {
