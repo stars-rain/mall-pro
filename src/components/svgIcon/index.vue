@@ -24,19 +24,18 @@ const props = withDefaults(defineProps<Props>(), {
   title: '',
 })
 /**
- * @type {ComputedRef<string>} icon图标的对应名称(位置)
+ * icon图标的对应名称(位置)
  */
 const iconName = computed(() => `#icon-${props.iconClass}`);
 /**
- * @type {ComputedRef<string>} icon图标的对应的class类名(用作css样式)
+ * icon图标的对应的class类名(用作css样式)
  */
 const svgClass = computed(() => props.popperClass ? "svg-icon " + props.popperClass : "svg-icon")
 </script>
 
 <style lang="less" scoped>
 .svg-icon {
-  width: 1em;
-  height: 1em;
+  .setWidHei(1em, 1em);
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
