@@ -56,11 +56,10 @@ export default defineComponent({
 
     .item {
       &-img {
-        width: 160px;
-        height: 110px;
+        .setWidHei(160px, 110px);
 
         img {
-          .widHei();
+          .setWidHei(100%, 100%);
           aspect-ratio: auto 160 / 110;
         }
       }
@@ -87,8 +86,7 @@ export default defineComponent({
         vertical-align: top;
 
         & > div {
-          width: 0.1rem;
-          height: 100px;
+          .setWidHei(0.1rem, 100px);
           margin: 10px auto;
           background-color: extract(@colors, 5);
         }
