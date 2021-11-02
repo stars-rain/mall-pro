@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store, { key } from './store'
 import SvgIcon from './components/svgIcon/index.vue'// svg组件
-import loadingBar from "./components/ui-component/loadingBar.vue"
+import loadingBar from "./components/ui-components/loadingBar.vue"
 import {
   create,
   NAvatar,
