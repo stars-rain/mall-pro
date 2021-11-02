@@ -9,7 +9,7 @@ const userOperaMenu: Array<UserOpearMenu> = [
     {
         id: 2,
         message: '修改用户名',
-        iconClass: 'userEdit',
+        iconClass: 'userEdit', 
     },
     {
         id: 3,
