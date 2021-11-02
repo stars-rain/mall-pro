@@ -55,12 +55,6 @@ const useState: <T extends { [key: string]: any }>(mapper: T, moduleName?: strin
         return useMapper(mapperFn(mapper), { isMapMutations: false, isMapState: true });
     }
 
-    /* const a = mapState('userModule', ["getName", "handleToLogin", "handleToAvatar"]);
-    const b = useState(
-        ["isLogin", "name", "avatarSrc"],
-        "UserModule"
-      ); */
-
 /**
  * 通过mapMutations辅助函数获取vuex里面state属性的数据
  * @param mapper - 需要通过vuex辅助函数访问的数据属性(可能是一个数组或者一个对象)
