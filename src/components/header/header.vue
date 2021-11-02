@@ -1,63 +1,89 @@
 <template>
-  <div class="container clearfix">
-    <a
-      href="javascript:void(0)"
-      class="header-nav header-nav__index"
-      @click="refresh"
-      >小米商城</a
-    >
-    <div
-      class="header-cart"
-      @mouseover="showCart = true"
-      @mouseout="showCart = false"
-    >
-      <router-link class="cart-nav" to="/">
-        <svg-icon popper-class="icon-cart" icon-class="cart"></svg-icon>
-        <span class="cart-hint">购物车 (0) </span>
-      </router-link>
-      <collapse-transition>
-        <div class="cart-datas" v-show="showCart">
-          <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
-        </div></collapse-transition
+  <div class="mall-header">
+    <div class="container clearfix">
+      <router-link to="/" class="header-nav header-nav__index"
+        >小米商城</router-link
       >
+      <div
+        class="header-cart"
+        @mouseover="showCart = true"
+        @mouseout="showCart = false"
+      >
+        <router-link class="cart-nav" to="/">
+          <svg-icon popper-class="icon-cart" icon-class="cart"></svg-icon>
+          <span class="cart-hint">购物车 (0) </span>
+        </router-link>
+        <collapse-transition>
+          <div class="cart-datas" v-show="showCart">
+            <p class="cart-empty">购物车中还没有商品，赶紧选购吧！</p>
+          </div></collapse-transition
+        >
+      </div>
+      <div class="header-logreg" v-if="!isLogin">
+        <router-link
+          class="header-nav"
+          :to="{ name: 'reglog', params: { title: 'login' }, replace: true }"
+          >登录</router-link
+        >
+        <span class="sep">|</span>
+        <router-link
+          class="header-nav"
+          :to="{ name: 'reglog', params: { title: 'register' }, replace: true }"
+          >注册</router-link
+        >
+      </div>
+      <user-avatar
+        v-else
+        :user-opera-menu="userOperaMenu"
+      ></user-avatar>
     </div>
-    <div class="header-logreg">
-      <router-link class="header-nav" to="/">登录</router-link>
-      <span class="sep">|</span>
-      <router-link class="header-nav" to="/">注册</router-link>
-    </div>
+    <slot></slot>
   </div>
-  <header-footer></header-footer>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import headerFooter from "./footer.vue";
+import userAvatar from "./avatar/index.vue";
+import { userOperaMenu } from "@/staticDatas/userOperMenu";
 
 export default defineComponent({
   name: "header-index",
   components: {
-    headerFooter,
+    userAvatar,
+  },
+  props: {
+    // 头部根元素的高度
+    height: {
+      type: String,
+      default: "40px",
+    },
   },
   data() {
     return {
       showCart: false, // 是否显示购物车
+      userOperaMenu, // 点击头像显示的对应菜单
     };
   },
 });
 </script>
 
 <script lang="ts" setup>
-import { useRouter } from "vue-router";
+import { useState } from "@/vuexHooks";
 
-const router = useRouter();
-/**
- * 刷新页面
- */
-const refresh: () => void = (): void => router.go(0);
+const { isLogin } = useState(
+  ["isLogin"],
+  "UserModule"
+);
 </script>
 
 <style lang="less" scoped>
+.mall {
+  &-header {
+    margin-bottom: 100px;
+    height: v-bind(height);
+    background-color: extract(@colors, 1);
+  }
+}
 .header-nav {
   color: #b0b0b0;
   padding: 0 5px;
