@@ -2,13 +2,13 @@
   <div class="footer-container">
     <div class="footer clearfix container">
       <div class="footer-logo">
-        <a class="logo" href="javascript:void(0)" @click="refresh"></a>
+        <router-link class="logo" to="/"></router-link>
       </div>
       <div class="footer-types">
         <ul @mouseleave="currentTitle = ''">
           <li
             class="commodity-type"
-            v-for="item in currentDatas"
+            v-for="item in commodityTypesDatas"
             :key="item.id"
             @mouseenter="handleToTitle(item.title)"
           >
@@ -20,6 +20,8 @@
                   'opacity-item':
                     item.title === beforeTitle && currentTitle !== '',
                 }"
+                v-model:current-title="currentTitle"
+                :title="item.title"
                 :data-active="currentTitle"
                 :data-before-active="beforeTitle"
                 v-show="item.title === currentTitle"
@@ -34,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 import childrenItem from "./childrenItem.vue";
 
 export default defineComponent({
@@ -42,25 +44,18 @@ export default defineComponent({
   components: {
     childrenItem,
   },
-  computed: {
+  props: {
     // 头部商品分类导航数据
-    // eslint-disable-next-line no-undef
-    currentDatas(): Array<CommodityTypes> {
-      return this.$store.state.commodityTypesDatas;
+    commodityTypesDatas: {
+      // eslint-disable-next-line no-undef
+      type: Array as PropType<Array<CommodityTypes>>,
+      required: true,
     },
   },
 });
 </script>
 
 <script lang="ts" setup>
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-/**
- * 刷新页面
- */
-const refresh: () => void = (): void => router.go(0);
-
 /**
  * @type {string} 当前鼠标悬停在头部商品分类导航的类型
  */
@@ -129,6 +124,8 @@ watch(
 
     .commodity {
       &-type {
+        font-size: 16px;
+        
         &:hover {
           & > a {
             color: extract(@colors, 3);

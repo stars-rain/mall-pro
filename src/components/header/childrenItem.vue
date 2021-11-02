@@ -3,7 +3,7 @@
     <div class="item-children__container">
       <ul>
         <li v-for="(item, index) in data" :key="item.id">
-          <a href="javascript:void(0);">
+          <a href="javascript:void(0);" @click="jumpRouter(title, item.id)">
             <div class="item-img">
               <img :src="item.imgSrc" alt="无法加载此图片" />
             </div>
@@ -23,12 +23,40 @@
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
-  name: "liItem",
+  name: "childrenItem",
+  emits: {
+    ["update:currentTitle"]<T>(str: T) {
+      if (typeof str === "string") return true;
+    },
+  },
   props: {
     data: {
       // eslint-disable-next-line no-undef
-      type: Array as PropType<Array<commodity>>,
+      type: Array as PropType<Array<Commodity>>,
       required: true,
+    },
+    /**
+     * 该件商品对应的类型
+     */
+    title: {
+      type: String,
+      required: true,
+    },
+  },
+  methods: {
+    /**
+     * 路由跳转(跳转至详情页)
+     * @param title - 该商品所属类型
+     * @param id - 该商品对应的id值
+     */
+    jumpRouter(title: string, id: number): void {
+      // 进入商品详情页折叠子导航栏
+      this.$emit("update:currentTitle", "");
+      this.$router.push({
+        name: "detailsPage",
+        params: { title },
+        query: { id },
+      });
     },
   },
 });
