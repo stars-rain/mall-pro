@@ -3,7 +3,7 @@ declare let require: NodeRequire;
  * 商品属性接口
  * @interface
  */
-declare interface commodity {
+interface Commodity {
     id: number; // 商品编号
     titleId: number; // 商品类型值id (后端根据此id值判断该商品类别)
     imgSrc: string; // 商品图片路径
@@ -19,7 +19,7 @@ declare interface commodity {
 declare type CommodityTypes = {
     id: number;
     title: string; // 头部商品分类导航的标题 (如： 手机、电视等)
-    products: Array<commodity>; // 头部商品分类导航的标题属性的子数据
+    products: Array<Commodity>; // 头部商品分类导航的标题属性的子数据
 }
 
 /**
@@ -30,4 +30,22 @@ declare type Carousel = {
     id: number;
     url: string;
     imgSrc: string;
+}
+
+/**
+ * 手机类型数据声明
+ */
+type Product1 = Pick<Commodity, 'id' | 'titleId' | 'imgSrc'> & { procuctId: number };
+
+declare type Phone = {
+    product1: Product1;
+    product2: Product1;
+    products: Array<Commodity>;
+}
+
+declare type User = {
+    userName: string;
+    account: string;
+    password: string;
+    repeatPassword: string;
 }
