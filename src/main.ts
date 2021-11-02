@@ -8,7 +8,7 @@ import {
 } from 'naive-ui'
 import $axios from "./plugins/axios"
 import $observer from "./plugins/observer"
-import collapseTransiton from "./components/functionalComponent/collapseTransition"
+import collapseTransiton from "./components/functionalComponents/collapseTransition"
 
 const native = create({
   components: [
