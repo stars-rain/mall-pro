@@ -70,7 +70,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, PropType } from "@vue/runtime-core";
-import myDialog from "@/components/ui-component/myDialog.vue";
+import myDialog from "@/components/ui-components/myDialog.vue";
 import avatarUpload from "./avatarUpload.vue";
 import outClose from "@/directives/vueClickClose";
 import type { UserOpearMenu } from "@/staticDatas/interface";
