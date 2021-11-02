@@ -2,24 +2,56 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store, { key } from './store'
-import SvgIcon from '@/components/svgIcon/index.vue'// svg组件
+import SvgIcon from './components/svgIcon/index.vue'// svg组件
+import loadingBar from "./components/ui-components/loadingBar.vue"
 import {
   create,
+  NAvatar,
+  NButton,
+  NForm,
+  NFormItem,
+  NInput,
+  NMessageProvider,
 } from 'naive-ui'
 import $axios from "./plugins/axios"
 import $observer from "./plugins/observer"
 import collapseTransiton from "./components/functionalComponents/collapseTransition"
 
-const native = create({
+const app: ReturnType<typeof createApp> = createApp(App);
+
+const native: ReturnType<typeof create> = create({
   components: [
+    NForm,
+    NFormItem,
+    NInput,
+    NButton,
+    NMessageProvider,
+    NAvatar,
   ],
 });
 
-const app = createApp(App);
+/**
+ * 全局组件
+ */
+const globalComponent: Map<string, any> = new Map<string, any>([
+  ['svg-icon', SvgIcon], // svg图片组件
+  ['loading-bar', loadingBar], // 加载条组件
+  ['collapse-transition', collapseTransiton], // 折叠展开动画组件
+]);
+for (const [k, v] of globalComponent.entries()) {
+  app.component(k, v);
+}
 
-/* 注册svg图标组件和展开折叠动画组件 */
-app.component('svg-icon', SvgIcon).component('collapse-transition', collapseTransiton);
-app.use(store, key).use(router).use(native).use($axios).use($observer).mount('#app')
+/**
+ * 插件
+ */
+const globalPlugins = [store, router, native, $axios, $observer];
+for (const value of globalPlugins) {
+  if (value === store) app.use(value, key)
+  else app.use(value)
+}
+
+app.mount('#app');
 
 /* 处理.svg文件 */
 const requireAll = (requireContext: any) => requireContext.keys().map(requireContext) //定义的一个遍历函数后面会调用

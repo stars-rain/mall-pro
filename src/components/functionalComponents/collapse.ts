@@ -41,7 +41,7 @@ class Transition {
         if (el.getAttribute('data-before-active')) return
         el.classList.toggle('collapse-transition', false); // 移除给折叠动画的目标元素加的类名
         el.style.height = ''; // el元素的style属性中不会显示height属性
-        el.style.overflow = el.data.oldOverflow;
+        el.style.overflow = el.data?.oldOverflow;
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -50,7 +50,7 @@ class Transition {
         el.classList.toggle('collapse-transition', true); // 给折叠动画的目标元素加入一个类名
         if (!el.data) el.data = {}; // 建立一个容器来保存目标元素的初始数据
 
-        el.data.oldOverflow = el.style.overflow; // 保存目标元素的overflow属性
+        el.data.oldOverflow = el.style?.overflow; // 保存目标元素的overflow属性
         el.data.oldPaddingTop = el.style.paddingTop; // 保存目标元素的上内边距
         el.data.oldPaddingBottom = el.style.paddingBottom; // 保存目标元素的下内边距
 
@@ -70,9 +70,9 @@ class Transition {
         if (el.getAttribute('data-active')) return;
         el.classList.toggle('collapse-transition', false); // 移除给折叠动画的目标元素加的类名
         el.style.height = ''; // el元素的style属性中不会显示height属性
-        el.style.overflow = el.data.oldOverflow;
-        el.style.paddingTop = el.data.oldPaddingTop;
-        el.style.paddingBottom = el.data.oldPaddingBottom;
+        el.style.overflow = el.data?.oldOverflow;
+        el.style.paddingTop = el.data?.oldPaddingTop;
+        el.style.paddingBottom = el.data?.oldPaddingBottom;
     }
 }
 
