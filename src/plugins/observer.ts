@@ -5,8 +5,9 @@ export default {
         /**
          * 主要作用是实现图片的懒加载
          * @param {Array<HTMLElement | HTMLElement>} ele - 被观察的元素
+         * @param {boolean} isHandleToSize - 目标元素是否需要改变图片的样式
          */
-        function observer(ele: HTMLElement | Array<HTMLElement>): void {
+        function observer(ele: HTMLElement | Array<HTMLElement>, isHandleToSize?: boolean): void {
             /**
              * 被观察元素执行的回调函数
              * @param {IntersectionObserverEntry[]} entries - 所有被观察元素的一个数据集合
@@ -21,8 +22,15 @@ export default {
                     if (entry.isIntersecting) {
                         /* 延迟懒加载图片 */
                         setTimeout(() => {
+                            if (isHandleToSize) {
+                                // 移除目标元素的style内联样式
+                                if (target.getAttribute('style')) target.removeAttribute('style');
+                                // 重新设置图片的宽高
+                                target.setAttribute('width', '100%');
+                                target.setAttribute('height', '100%');
+                            }
                             target.setAttribute('src', target.getAttribute('data-src') as string);
-                        }, 150);
+                        }, 200);
                         observe.unobserve(target); // 对该元素停止观察
                     }
                 })
