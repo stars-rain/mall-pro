@@ -3,7 +3,7 @@ declare let require: NodeRequire;
  * 商品属性接口
  * @interface
  */
-declare interface commodity {
+declare interface Commodity {
     id: number; // 商品编号
     titleId: number; // 商品类型值id (后端根据此id值判断该商品类别)
     imgSrc: string; // 商品图片路径
