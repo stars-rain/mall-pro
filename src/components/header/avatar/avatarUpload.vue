@@ -75,11 +75,7 @@ const handleToFiles: () => void = (): void => {
       .then((res) => {
         if (res.data.status === "success") {
           store.commit("UserModule/handleToAvatar", {
-            src:
-              res.data.messages.avatarSrc +
-              `?${Base64.encode(
-                JSON.stringify(new Date().getTime()) + Math.random()
-              )}`, // 将后台返回的数据转化为url格式
+            src: res.data.messages.avatarSrc,
           });
           message.success("上传成功");
         } else message.error("上传失败");
