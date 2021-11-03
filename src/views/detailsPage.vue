@@ -7,12 +7,45 @@
           :commodity-types-datas="commodityTypesDatas"
         ></header-footer> </mallHeader
     ></n-message-provider>
-    <div class="details">哈哈哈哈 {{ id }} {{ title }}</div></loading-bar
-  >
+    <collapse-transition>
+      <div class="details-buy--prompt" v-if="showPrompt">
+        为了方便您购买，请提前
+        <router-link
+          class="header-nav"
+          :to="{ name: 'reglog', params: { title: 'login' } }"
+          >登录</router-link
+        >
+        <svg-icon
+          popper-class="dialog-close"
+          style="vertical-align: -5px"
+          icon-class="close"
+          @click="showPrompt = false"
+        ></svg-icon></div
+    ></collapse-transition>
+    <div :class="{ details: true, 'details-login': !showPrompt }">
+      <div
+        :class="{
+          'details-body': true,
+          container: true,
+          'details-body--login': !showPrompt,
+        }"
+      >
+        <div class="details-body--img">
+          <img src="../../public/reglogbagimg.jpg" alt="无法加载此图片" />
+        </div>
+      </div></div
+  ></loading-bar>
 </template>
 
 <script lang="ts">
-import { defineComponent, defineProps, watchEffect } from "@vue/runtime-core";
+import {
+  defineComponent,
+  defineProps,
+  watchEffect,
+  computed,
+  ref,
+  watch,
+} from "@vue/runtime-core";
 import mallHeader from "@/components/header/header.vue";
 import headerFooter from "../components/header/footer.vue";
 import { mapActions } from "vuex";
@@ -29,9 +62,6 @@ export default defineComponent({
     commodityTypesDatas(): Array<CommodityTypes> {
       return this.$store.state.commodityTypesDatas;
     },
-  },
-  beforeRouteUpdate() {
-    console.log("啊哈哈哈");
   },
   methods: {
     ...mapActions([
@@ -51,14 +81,35 @@ export default defineComponent({
         .catch(() => this.$router.replace("/404")); // 获取失败则定位到404页面
     });
   },
+  watch: {},
 });
 </script>
 
 <script lang="ts" setup>
 import { useRoute } from "vue-router";
+import { useMessage } from "naive-ui";
+import { useStore } from "@/store/index";
 // import { $axios } from "@/plugins/axios";
 
+const store = useStore();
 const route = useRoute();
+const $message = useMessage();
+/**
+ * 用户是否登录
+ */
+let isLogin = computed(() => store.state.UserModule.isLogin);
+/**
+ * 是否显示登录提示
+ */
+let showPrompt = ref<boolean>(!isLogin.value);
+
+watch(
+  (): boolean => isLogin.value,
+  (value): void => {
+    // 观察用户是否登录从而是否显示登录提示
+    showPrompt.value = !value;
+  }
+);
 
 defineProps<{
   id: string;
@@ -73,5 +124,39 @@ watchEffect(() => {
 <style lang="less" scoped>
 .details {
   font-size: 16px;
+
+  &-login {
+    border-top: 1px solid transparent;
+  }
+
+  &-buy--prompt {
+    text-align: center;
+    line-height: 50px;
+    font-size: 14px;
+    color: extract(@colors, 1);
+    background-image: linear-gradient(#ecebeb, #fff);
+
+    a {
+      margin-right: 8px;
+      color: extract(@colors, 3);
+    }
+  }
+
+  &-body {
+    margin-top: 50px;
+    padding: 0 10px;
+
+    &--img {
+      .setWidHei(50%, 400px);
+
+      img {
+        .setWidHei(100%, 100%);
+      }
+    }
+
+    &--login {
+      margin-top: 50px;
+    }
+  }
 }
 </style>
