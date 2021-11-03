@@ -61,7 +61,7 @@ const UserModule: Module<UserState, RootState> = {
         const { data } = await $axios([
           '/refresh',
           'post',
-          { params: Base64.encode(JSON.stringify({ account: Base64.encode(payload.account) })) },
+          { params: Base64.encode(JSON.stringify({ account: payload.account })) },
         ]);
         if (data.status === 'success') {
           const usr = JSON.parse(Base64.decode(data.messages.user));
