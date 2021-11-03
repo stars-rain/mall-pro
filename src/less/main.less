@@ -1,6 +1,6 @@
 @width    : 1226px;
 @arrowleft: 25px; // 轮播图左右切换箭头的左右外边距
-@menuBgk: #e4e4e4; // 菜单按钮背景
+@menuBgk  : #e4e4e4; // 菜单按钮背景
 @colors   : #333,
 #424242,
 #ff6700,
@@ -57,4 +57,15 @@ a {
 
 .collapse-transition {
     transition: height .3s ease-in-out, padding-top .3s ease-in-out, padding-bottom .3s ease-in-out;
+}
+
+.dialog-close {
+    font-size : 22px;
+    color     : rgb(105, 101, 101);
+    transition: color 0.2s ease-in-out;
+    cursor    : pointer;
+
+    &:hover {
+        color: extract(@colors, 1);
+    }
 }

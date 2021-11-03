@@ -35,11 +35,7 @@
       </ul></transition
     >
   </div>
-  <my-dialog
-    v-model="showDialog"
-    :title="currentOpeartion"
-    :close="!loading"
-  >
+  <my-dialog v-model="showDialog" :title="currentOpeartion" :close="!loading">
     <n-message-provider>
       <user-form
         ref="user_form"
@@ -154,7 +150,7 @@ const handleToUpload: () => void = (): void => {
 // 退出登录
 const quitLogin: () => void = (): void => {
   isOpenMenu(false); // 关闭操作菜单
-  $axios(["", "patch", { isLogin: false }])
+  $axios(["/logout", "patch", { isLogin: false }])
     .then((res) => {
       if (res.data.status === "success") {
         Cookie.deleteCookie(); // 删除Cookie
@@ -167,22 +163,15 @@ const quitLogin: () => void = (): void => {
           handleToAddress(), // 清除保存的用户的地址
           handleToAccount(), // 清除保存的用户账号
         ]).then(() => message.success("退出成功"));
+      } else {
+        message.error("退出失败");
+        console.log(res.data.reason);
       }
     })
     .catch((error) => {
       message.error("退出失败");
       console.log(error);
     });
-  Cookie.deleteCookie(); // 删除Cookie
-  Promise.all([
-    handleToUserName(), // 清除保存的用户名
-    handleToAvatar(), // 将用户的头像路径改为默认路径
-    handleToLogin(), // 改变用户的登录状态为未登录
-    handleToName(), // 清除保存的用户的真实姓名
-    handleToTelephone(), // 清除保存的用户的手机号码
-    handleToAddress(), // 清除保存的用户的地址
-    handleToAccount(), // 清除保存的用户账号
-  ]).then(() => message.success("退出成功"));
 };
 
 let currentOpeartion = ref<string>("");
