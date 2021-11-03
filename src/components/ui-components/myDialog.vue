@@ -16,7 +16,7 @@
                     {{ title }}</span
                   >
                   <svg-icon
-                    popper-class="dialog-header__close"
+                    popper-class="dialog-header__close dialog-close"
                     icon-class="close"
                     @click="closeDialog"
                   ></svg-icon>
@@ -261,16 +261,8 @@ export default defineComponent({
 
     &__close {
       position: absolute;
-      font-size: 22px;
-      cursor: pointer;
       right: 10px;
       top: 8px;
-      color: rgb(105, 101, 101);
-      transition: color 0.2s ease-in-out;
-
-      &:hover {
-        color: extract(@colors, 1);
-      }
     }
   }
 
