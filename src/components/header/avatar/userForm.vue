@@ -66,7 +66,7 @@
         <template #prefix>
           <svg-icon
             popper-class="user-mess--input__icon"
-            icon-class="telephone"
+            icon-class="cellPhone"
           ></svg-icon></template></n-input
     ></n-form-item>
     <n-form-item
