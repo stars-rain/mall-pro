@@ -127,7 +127,7 @@ export default defineComponent({
   methods: {
     // 重定向到商城首页
     redirect(): void {
-      this.$router.replace("/");
+      this.$router.go(-1);
     },
     // 当路由改变时将表单的检验还原到未检验的状态(主要作用是暴露给父组件使用)
     restoreValidation(): void {
@@ -318,14 +318,17 @@ const validateForm: (title: string) => void = (title: string): void => {
                     : null,
                   usr.address ? handleToAddress({ name: usr.address }) : null,
                 ])
-                  .then(() => router.replace("/"))
+                  .then(() => {
+                    if (router.currentRoute.value.name === "reglog")
+                      router.go(-1);
+                  })
                   .catch((error) => console.log(error));
               } else if (res.data.status === "error") {
                 // 登录验证失败则账号输入框聚焦
                 nextTick(() => userAccount.value?.focus());
                 $message.error(res.data.messages.reason);
               }
-            }, 3000);
+            }, 1000);
           })
           .catch((error) => {
             console.log(error);
@@ -365,7 +368,7 @@ const validateForm: (title: string) => void = (title: string): void => {
                 else nextTick(() => userName.value?.focus());
                 $message.error(res.data.messages.reason);
               }
-            }, 3000);
+            }, 1000);
           })
           .catch((error) => {
             console.log(error);
