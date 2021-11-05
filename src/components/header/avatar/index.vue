@@ -1,6 +1,6 @@
 <template>
-  <div class="header-avatar">
-    <n-message-provider>
+  <n-message-provider>
+    <div class="header-avatar">
       <div class="upload-trigger">
         <avatar-upload ref="uploadAvatar" action="/saveImg">
           <n-avatar
@@ -13,55 +13,54 @@
           ></n-avatar
         ></avatar-upload>
       </div>
-    </n-message-provider>
-    <span>在线</span>
-    <transition name="fade">
-      <ul
-        v-show="showMenu"
-        class="popover-avatarUpload"
-        v-outClose="isOpenMenu"
-      >
-        <li
-          v-for="item in userOperaMenu"
-          :key="item.id"
-          @click="handleToMenu(item.message)"
+
+      <span>在线</span>
+      <transition name="fade">
+        <ul
+          v-show="showMenu"
+          class="popover-avatarUpload"
+          v-outClose="isOpenMenu"
         >
-          <svg-icon
-            popper-class="user-message__icon"
-            :icon-class="item.iconClass"
-          ></svg-icon>
-          {{ item.message }}
-        </li>
-      </ul></transition
-    >
-  </div>
-  <my-dialog v-model="showDialog" :title="currentOpeartion" :close="!loading">
-    <n-message-provider>
+          <li
+            v-for="item in userOperaMenu"
+            :key="item.id"
+            @click="handleToMenu(item.message)"
+          >
+            <svg-icon
+              popper-class="user-message__icon"
+              :icon-class="item.iconClass"
+            ></svg-icon>
+            {{ item.message }}
+          </li>
+        </ul></transition
+      >
+    </div>
+    <my-dialog v-model="showDialog" :title="currentOpeartion" :close="!loading">
       <user-form
         ref="user_form"
         v-model:opeartion-type="currentOpeartion"
         v-model:loading="loading"
         v-model:show-dialog="showDialog"
-      ></user-form
-    ></n-message-provider>
-    <template #footer>
-      <n-button
-        @click="showDialog = false"
-        :disabled="loading"
-        attr-type="button"
-        size="medium"
-        >取消</n-button
-      >
-      <n-button
-        type="info"
-        size="medium"
-        attr-type="button"
-        :loading="loading"
-        @click="submit(currentOpeartion)"
-        >{{ loading ? "确认中" : "确认" }}</n-button
-      >
-    </template>
-  </my-dialog>
+      ></user-form>
+      <template #footer>
+        <n-button
+          @click="showDialog = false"
+          :disabled="loading"
+          attr-type="button"
+          size="medium"
+          >取消</n-button
+        >
+        <n-button
+          type="info"
+          size="medium"
+          attr-type="button"
+          :loading="loading"
+          @click="submit(currentOpeartion)"
+          >{{ loading ? "确认中" : "确认" }}</n-button
+        >
+      </template>
+    </my-dialog></n-message-provider
+  >
 </template>
 
 <script lang="ts">
@@ -174,6 +173,9 @@ const quitLogin: () => void = (): void => {
     });
 };
 
+/**
+ * 用户当前修改哪项信息的具体操作名称
+ */
 let currentOpeartion = ref<string>("");
 /**
  * 是否显示对话框

@@ -22,20 +22,17 @@
       <div class="header-logreg" v-if="!isLogin">
         <router-link
           class="header-nav"
-          :to="{ name: 'reglog', params: { title: 'login' }, replace: true }"
+          :to="{ name: 'reglog', params: { title: 'login' } }"
           >登录</router-link
         >
         <span class="sep">|</span>
         <router-link
           class="header-nav"
-          :to="{ name: 'reglog', params: { title: 'register' }, replace: true }"
+          :to="{ name: 'reglog', params: { title: 'register' } }"
           >注册</router-link
         >
       </div>
-      <user-avatar
-        v-else
-        :user-opera-menu="userOperaMenu"
-      ></user-avatar>
+      <user-avatar v-else :user-opera-menu="userOperaMenu"></user-avatar>
     </div>
     <slot></slot>
   </div>
@@ -70,10 +67,7 @@ export default defineComponent({
 <script lang="ts" setup>
 import { useState } from "@/vuexHooks";
 
-const { isLogin } = useState(
-  ["isLogin"],
-  "UserModule"
-);
+const { isLogin } = useState(["isLogin"], "UserModule");
 </script>
 
 <style lang="less" scoped>

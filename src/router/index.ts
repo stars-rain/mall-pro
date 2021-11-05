@@ -31,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'detailsPage',
     path: '/detailsPage/:title',
-    component: () => import('@/views/detailsPage.vue'),
+    component: () => import('@/views/detailsPage/detailsPage.vue'),
     props: (route) => ({ id: route.query.id, title: route.params.title }),
     meta: {
       title: '商品详情',

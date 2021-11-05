@@ -65,7 +65,7 @@ const UserModule: Module<UserState, RootState> = {
         ]);
         if (data.status === 'success') {
           const usr = JSON.parse(Base64.decode(data.messages.user));
-          Object.keys(usr).forEach((key: string) => usr[key]?.length ? (state as any)[key] = usr[key] : null);
+          Object.keys(state).forEach((key: string) => usr[key]?.length ? (state as any)[key] = usr[key] : null);
           // 此时用户已是登录状态
           commit('handleToLogin', { isLogin: true });
           return Promise.resolve(true);

@@ -202,7 +202,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .mask-layer {
   position: fixed;
-  z-index: 99999999;
+  z-index: 5555;
   top: 0;
   bottom: 0;
   width: 100%;
