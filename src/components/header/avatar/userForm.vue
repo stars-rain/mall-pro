@@ -19,7 +19,7 @@
         :disabled="loading"
         clearable
         :maxlength="8"
-        @keypress.enter.prevent="submit(opeartionType)"
+        @keyup.enter.prevent="submit(opeartionType)"
         :value="form.username.trim()"
         @input="form.username = $event"
       >
@@ -46,7 +46,7 @@
         <template #prefix>
           <svg-icon
             popper-class="user-mess--input__icon"
-            icon-class="user"
+            icon-class="receiver"
           ></svg-icon></template></n-input></n-form-item
     ><n-form-item
       path="telephone"
@@ -58,7 +58,7 @@
         :disabled="loading"
         class="dialog-input"
         placeholder="请输入手机号码"
-        @keypress.enter.prevent="inputFocus('adressRef')"
+        @keypress.enter.prevent="inputFocus('addressRef')"
         clearable
         :maxlength="11"
         v-model:value="form.telephone"
@@ -75,7 +75,7 @@
       label="收货地址"
     >
       <n-input
-        ref="adressRef"
+        ref="addressRef"
         :disabled="loading"
         type="textarea"
         size="small"
@@ -85,7 +85,7 @@
         class="dialog-input"
         placeholder="请输入收货地址"
         :maxlength="40"
-        @keypress.enter.prevent="submit(opeartionType)"
+        @keyup.enter.prevent="submit(opeartionType)"
         :value="form.address.trim()"
         @input="form.address = $event"
       />
@@ -102,7 +102,7 @@
         class="dialog-input"
         show-password-on="click"
         placeholder="请输入原密码"
-        @keypress.enter.prevent="submit(opeartionType)"
+        @keyup.enter.prevent="submit(opeartionType)"
         v-model:value="form.validatePassword"
         clearable
         :maxlength="8"
@@ -150,7 +150,7 @@
         ref="confirmPasswordRef"
         :disabled="!form.password || loading"
         class="dialog-input"
-        @keypress.enter.prevent="submit(opeartionType)"
+        @keyup.enter.prevent="submit(opeartionType)"
         v-model:value="form.confirmPassword"
         type="password"
         placeholder="请重复输入密码"
@@ -258,8 +258,8 @@ interface User {
  */
 let form = reactive<User>({
   username: userName.value,
-  telephone: name.value,
-  name: telephone.value,
+  telephone: telephone.value,
+  name: name.value,
   address: address.value,
   validatePassword: "",
   password: "",
@@ -422,14 +422,17 @@ const $http: <T>(
           if (res.data.status === "success") {
             if (typeof successMess === "string") $message.success(successMess); // 弹出成功操作后的提示内容
             resolve(true);
-          } else {
+          } else if (res.data.status === "error") {
             if (typeof errorMess === "string") $message.error(errorMess); // 弹出失败操作后的提示内容
-            console.log(res.data.status);
+            console.log(res.data.reason);
             resolve(false);
           }
-        }, 1500);
+        }, 1000);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        resolve(false);
+        console.log(error);
+      });
   });
 };
 
@@ -445,12 +448,21 @@ const submit: (type: string) => void = (type: string): void => {
     emits("update:loading", true); // 开始加载动画
     switch (type) {
       case "修改用户名": {
+        if (form.username === userName.value) {
+          emits("update:loading", false); // 结束加载动画
+          $message.error("新旧用户名不能相同");
+          return;
+        }
         const usr = {
-          account: Base64.encode(account),
+          account: Base64.encode(account.value),
           userName: Base64.encode(form.username),
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          [
+            "/updateUserName",
+            "post",
+            { params: Base64.encode(JSON.stringify(usr)) },
+          ],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -463,11 +475,15 @@ const submit: (type: string) => void = (type: string): void => {
       }
       case "验证密码": {
         const usr = {
-          account: Base64.encode(account),
+          account: Base64.encode(account.value),
           password: Base64.encode(form.validatePassword),
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          [
+            "/checkPassword",
+            "post",
+            { params: Base64.encode(JSON.stringify(usr)) },
+          ],
           "验证成功",
           "验证失败"
         ).then((res: boolean): void => {
@@ -478,11 +494,15 @@ const submit: (type: string) => void = (type: string): void => {
       }
       case "修改密码": {
         const usr = {
-          account: Base64.encode(account),
+          account: Base64.encode(account.value),
           password: Base64.encode(form.password),
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          [
+            "/updatePassword",
+            "post",
+            { params: Base64.encode(JSON.stringify(usr)) },
+          ],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -492,14 +512,27 @@ const submit: (type: string) => void = (type: string): void => {
         break;
       }
       case "设置收货信息": {
+        if (
+          form.name === name.value &&
+          form.telephone === telephone.value &&
+          form.address === address.value
+        ) {
+          emits("update:loading", false); // 结束加载动画
+          $message.error("新旧收货信息不能相同");
+          return;
+        }
         const usr = {
-          account: Base64.encode(account),
+          account: Base64.encode(account.value),
           name: Base64.encode(form.name),
           telephone: Base64.encode(form.telephone),
           address: Base64.encode(form.address),
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          [
+            "/setReceiptInfo",
+            "post",
+            { params: Base64.encode(JSON.stringify(usr)) },
+          ],
           "设置成功",
           "设置失败"
         ).then((res: boolean): void => {
