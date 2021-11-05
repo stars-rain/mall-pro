@@ -295,6 +295,7 @@ const validateInput: (
     validatePasswordStartWith?: string
   ): ((rules: FormItemRule, value: string) => boolean | Error) =>
   (rules: FormItemRule, value: string): boolean | Error => {
+    value = value.trim();
     if (!value && title !== "重复密码") return new Error(`${title}不能为空`);
     else if (!value.match(/^1/g) && title === "手机号码")
       return new Error(`${title}只能以1开头`);
@@ -302,7 +303,7 @@ const validateInput: (
       return new Error(`${title}只能由数字组成`);
     else if (
       !value.match(/^[a-zA-Z0-9_\\.]{1,}$/g) &&
-      (title === "密码" || "重复密码" || "验证密码")
+      (title === "验证密码" || title === "密码" || title === "重复密码")
     )
       return new Error(`${title}只能由字母、数字、小数点和下划线组成`);
     else if (
@@ -329,12 +330,12 @@ const rules: FormRules | any = {
   username: {
     required: true,
     trigger: "blur",
-    message: "用户名不能为空",
+    validator: validateInput("用户名"),
   },
   name: {
     required: true,
     trigger: "blur",
-    message: "姓名不能为空",
+    validator: validateInput("收货人姓名"),
   },
   telephone: {
     required: true,
@@ -344,11 +345,11 @@ const rules: FormRules | any = {
   address: {
     required: true,
     trigger: "blur",
-    message: "收获地址不能为空",
+    validator: validateInput("收货地址"),
   },
   validatePassword: {
     required: true,
-    trigger: "blur",
+    trigger: ["blur", "input"],
     validator: validateInput("验证密码", 8),
   },
   password: {
@@ -423,13 +424,13 @@ const $http: <T>(
             if (typeof successMess === "string") $message.success(successMess); // 弹出成功操作后的提示内容
             resolve(true);
           } else if (res.data.status === "error") {
-            if (typeof errorMess === "string") $message.error(errorMess); // 弹出失败操作后的提示内容
-            console.log(res.data.reason);
+            $message.error(res.data.reason); // 弹出失败操作后的提示内容
             resolve(false);
           }
         }, 1000);
       })
       .catch((error) => {
+        $message.error(errorMess as string);
         resolve(false);
         console.log(error);
       });
@@ -448,14 +449,14 @@ const submit: (type: string) => void = (type: string): void => {
     emits("update:loading", true); // 开始加载动画
     switch (type) {
       case "修改用户名": {
-        if (form.username === userName.value) {
+        if (form.username.trim() === userName.value) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧用户名不能相同");
           return;
         }
         const usr = {
           account: Base64.encode(account.value),
-          userName: Base64.encode(form.username),
+          userName: Base64.encode(form.username.trim()),
         };
         $http(
           [
@@ -467,7 +468,7 @@ const submit: (type: string) => void = (type: string): void => {
           "修改失败"
         ).then((res: boolean): void => {
           if (res) {
-            handleToUserName({ name: form.username }); // 通知vuex的UserModule修改用户名
+            handleToUserName({ name: form.username.trim() }); // 通知vuex的UserModule修改用户名
             emits("update:showDialog", false); // 关闭对话框
           } else user_nameRef.value?.focus(); // 用户名输入框聚焦
         });
@@ -476,7 +477,7 @@ const submit: (type: string) => void = (type: string): void => {
       case "验证密码": {
         const usr = {
           account: Base64.encode(account.value),
-          password: Base64.encode(form.validatePassword),
+          password: Base64.encode(form.validatePassword.trim()),
         };
         $http(
           [
@@ -487,15 +488,17 @@ const submit: (type: string) => void = (type: string): void => {
           "验证成功",
           "验证失败"
         ).then((res: boolean): void => {
-          if (res) emits("update:opeartionType", "修改密码");
-          else validatePasswordRef.value?.focus();
+          if (res) {
+            emits("update:opeartionType", "修改密码");
+            setTimeout(() => passwordRef.value?.focus(), 0);
+          } else validatePasswordRef.value?.focus();
         });
         break;
       }
       case "修改密码": {
         const usr = {
           account: Base64.encode(account.value),
-          password: Base64.encode(form.password),
+          password: Base64.encode(form.password.trim()),
         };
         $http(
           [
@@ -513,9 +516,9 @@ const submit: (type: string) => void = (type: string): void => {
       }
       case "设置收货信息": {
         if (
-          form.name === name.value &&
+          form.name.trim() === name.value &&
           form.telephone === telephone.value &&
-          form.address === address.value
+          form.address.trim() === address.value
         ) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧收货信息不能相同");
@@ -523,9 +526,9 @@ const submit: (type: string) => void = (type: string): void => {
         }
         const usr = {
           account: Base64.encode(account.value),
-          name: Base64.encode(form.name),
+          name: Base64.encode(form.name.trim()),
           telephone: Base64.encode(form.telephone),
-          address: Base64.encode(form.address),
+          address: Base64.encode(form.address.trim()),
         };
         $http(
           [
@@ -538,9 +541,9 @@ const submit: (type: string) => void = (type: string): void => {
         ).then((res: boolean): void => {
           if (res) {
             Promise.all([
-              handleToName({ name: form.name }),
+              handleToName({ name: form.name.trim() }),
               handleToTelephone({ telephone: form.telephone }),
-              handleToAddress({ address: form.address }),
+              handleToAddress({ address: form.address.trim() }),
             ])
               .then(() => {
                 emits("update:showDialog", false);
