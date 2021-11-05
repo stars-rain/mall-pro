@@ -70,7 +70,7 @@
         show-password-on="click"
         clearable
         :maxlength="8"
-        @keydown.enter.prevent="toValidate" /><svg-icon
+        @keyup.enter.prevent="toValidate" /><svg-icon
         popper-class="input-icon"
         icon-class="locked"
       ></svg-icon
@@ -290,8 +290,8 @@ const validateForm: (title: string) => void = (title: string): void => {
         // 执行登录操作
         // eslint-disable-next-line no-undef
         const user: Omit<User, "userName" | "repeatPassword"> = {
-          account: Base64.encode(formValue.user.account),
-          password: Base64.encode(formValue.user.password),
+          account: Base64.encode(formValue.user.account.trim()),
+          password: Base64.encode(formValue.user.password.trim()),
         };
         $axios([
           "/login",
@@ -306,7 +306,7 @@ const validateForm: (title: string) => void = (title: string): void => {
                 // 保存用户账号到cookie中
                 Cookie.setCookie({ account: user.account }, 0.5);
                 Promise.all([
-                  handleToAccount({ account: formValue.user.account }),
+                  handleToAccount({ account: formValue.user.account.trim() }),
                   handleToUserName({ name: usr.userName }),
                   handleToLogin({ isLogin: true }),
                   usr.avatarSrc ? handleToAvatar({ src: usr.avatarSrc }) : null,
@@ -316,7 +316,11 @@ const validateForm: (title: string) => void = (title: string): void => {
                         telephone: usr.telephone,
                       })
                     : null,
-                  usr.address ? handleToAddress({ name: usr.address }) : null,
+                  usr.address
+                    ? handleToAddress({
+                        address: usr.address,
+                      })
+                    : null,
                 ])
                   .then(() => {
                     if (router.currentRoute.value.name === "reglog")
@@ -343,9 +347,9 @@ const validateForm: (title: string) => void = (title: string): void => {
         // 执行注册操作
         // eslint-disable-next-line no-undef
         const user: Omit<User, "repeatPassword"> = {
-          userName: Base64.encode(formValue.user.userName),
-          account: Base64.encode(formValue.user.account),
-          password: Base64.encode(formValue.user.password),
+          userName: Base64.encode(formValue.user.userName.trim()),
+          account: Base64.encode(formValue.user.account.trim()),
+          password: Base64.encode(formValue.user.password.trim()),
         };
         $axios([
           "/register",
@@ -436,8 +440,9 @@ const validateInput: (
     validatePasswordStartWith?: string
   ): ((rules: FormItemRule, value: string) => boolean | Error) =>
   (rules: FormItemRule, value: string): boolean | Error => {
+    value = value.trim();
     if (!value && title !== "重复密码") return new Error(`${title}不能为空`);
-    else if (!value.match(/^[a-zA-Z0-9_\\.]{1,}$/g))
+    else if (!value.match(/^[a-zA-Z0-9_\\.]{1,}$/g) && title !== '用户名')
       return new Error(`${title}只能由字母、数字、小数点和下划线组成`);
     else if (
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -465,7 +470,7 @@ const rules: FormRules | any = {
     userName: {
       required: true,
       trigger: "blur",
-      message: "用户名不能为空",
+      validator: validateInput("用户名"),
     },
     account: {
       required: true,
