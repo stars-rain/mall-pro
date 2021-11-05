@@ -19,7 +19,7 @@
         :disabled="loading"
         clearable
         @keyup.enter.prevent="submit(opeartionType)"
-        :value="form.name.trim()"
+        :value="form.name?.trim()"
         @input="form.name = $event"
       >
         <template #prefix>
@@ -66,7 +66,7 @@
         placeholder="请输入新收货地址"
         :maxlength="40"
         @keyup.enter.prevent="submit(opeartionType)"
-        :value="form.address.trim()"
+        :value="form.address?.trim()"
         @input="form.address = $event"
       />
     </n-form-item>
@@ -88,12 +88,7 @@ import {
   onBeforeUnmount,
 } from "@vue/runtime-core";
 import { useState, useMutations } from "@/vuexHooks";
-import type {
-  NInput,
-  NForm,
-  FormRules,
-  FormItemRule,
-} from "naive-ui";
+import type { NInput, NForm, FormRules, FormItemRule } from "naive-ui";
 import { Base64 } from "js-base64";
 import { $axios } from "@/plugins/axios";
 import { useMessage } from "naive-ui";
@@ -191,13 +186,13 @@ const $http: <T>(
             if (typeof successMess === "string") $message.success(successMess); // 弹出成功操作后的提示内容
             resolve(true);
           } else if (res.data.status === "error") {
-            if (typeof errorMess === "string") $message.error(errorMess); // 弹出失败操作后的提示内容
-            console.log(res.data.reason);
+            $message.error(res.data.reason); // 弹出失败操作后的提示内容
             resolve(false);
           }
         }, 1000);
       })
       .catch((error) => {
+        $message.error(errorMess as string); // 弹出失败操作后的提示内容
         resolve(false);
         console.log(error);
       });
@@ -216,26 +211,22 @@ const submit: (type: string) => void = (type: string): void => {
     emits("update:loading", true); // 开始加载动画
     switch (type) {
       case "修改收货人姓名": {
-        if (form.name === name.value) {
+        if (form.name.trim() === name.value) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧收货人姓名不能相同");
           return;
         }
         const usr = {
           account: Base64.encode(account.value),
-          name: Base64.encode(form.name),
+          name: Base64.encode(form.name.trim()),
         };
         $http(
-          [
-            "",
-            "post",
-            { params: Base64.encode(JSON.stringify(usr)) },
-          ],
+          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
           if (res) {
-            handleToName({ name: form.name }); // 通知vuex的UserModule修改用户名
+            handleToName({ name: form.name.trim() }); // 通知vuex的UserModule修改用户名
             emits("update:showDialog", false); // 关闭对话框
           } else receiptNameRef.value?.focus(); // 收货人姓名输入框聚焦
         });
@@ -252,11 +243,7 @@ const submit: (type: string) => void = (type: string): void => {
           telephone: Base64.encode(form.telephone),
         };
         $http(
-          [
-            "",
-            "post",
-            { params: Base64.encode(JSON.stringify(usr)) },
-          ],
+          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -268,26 +255,22 @@ const submit: (type: string) => void = (type: string): void => {
         break;
       }
       case "修改收货地址": {
-        if (form.address === address.value) {
+        if (form.address.trim() === address.value) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧收货地址不能相同");
           return;
         }
         const usr = {
           account: Base64.encode(account.value),
-          address: Base64.encode(form.address),
+          address: Base64.encode(form.address.trim()),
         };
         $http(
-          [
-            "",
-            "post",
-            { params: Base64.encode(JSON.stringify(usr)) },
-          ],
+          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
           if (res) {
-            handleToAddress({ address: form.address }); // 通知vuex的UserModule修改用户名
+            handleToAddress({ address: form.address.trim() }); // 通知vuex的UserModule修改用户名
             emits("update:showDialog", false); // 关闭对话框
           } else addressItemRef.value?.focus(); // 用户名输入框聚焦
         });
@@ -312,6 +295,7 @@ const validateInput: (
     count?: number
   ): ((rules: FormItemRule, value: string) => boolean | Error) =>
   (rules: FormItemRule, value: string): boolean | Error => {
+    value = value.trim();
     if (!value && title !== "重复密码") return new Error(`${title}不能为空`);
     else if (!value.match(/^1/g) && title === "手机号码")
       return new Error(`${title}只能以1开头`);
@@ -326,7 +310,7 @@ const rules: FormRules | any = {
   name: {
     required: true,
     trigger: "blur",
-    message: "收货人姓名不能为空",
+    validator: validateInput("收货人姓名", 11),
   },
   telephone: {
     required: true,
@@ -336,7 +320,7 @@ const rules: FormRules | any = {
   address: {
     required: true,
     trigger: "blur",
-    message: "收获地址不能为空",
+    validator: validateInput("收货地址", 11),
   },
 };
 
