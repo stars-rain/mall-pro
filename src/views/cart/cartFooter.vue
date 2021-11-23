@@ -73,6 +73,7 @@ const props = defineProps<{
   cartList: Array<CartItem>; // 购物车数据列表
 }>();
 const emits = defineEmits<{
+  (e: "handlerSelectids", ids: Array<number>): void; // 通知父组件用户所勾选的商品id集合以改变
   (e: "handlerPrompt", mess: string): void;
   (e: "handlerDialog", show: boolean): void;
 }>();
@@ -149,6 +150,7 @@ const payingFor: () => void = (): void => {
       })
       .then((value: boolean): void => {
         if (value) {
+          emits('handlerSelectids', []); // 清空已勾选的商品id集合
           $message.success("付款成功，祝您购物愉快");
         } else $message.error("付款失败");
         loading.value = false; // 关闭动画
