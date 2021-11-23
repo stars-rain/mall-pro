@@ -48,11 +48,16 @@ const props = withDefaults(
      * 是否需要重新滚动到最后一张图片(当前所显示轮播图片已经是第一张且继续向上切换时重新回到最后一张图片)
      */
     thelast?: boolean;
+    /**
+     * 恢复轮播的时间
+     */
+    time?: number;
   }>(),
   {
     id: 0,
     theone: false,
     thelast: false,
+    time: 4500,
   }
 );
 const emit =
@@ -97,7 +102,7 @@ const handleToId: (id: number) => void = (function (): (id: number) => void {
     clearTiming(); // 清除恢复轮播功能
     if (id !== props.id) emit("update:id", id); // 改变当前显示图片的id值
     setTimeout(() => (debounce = false), 600);
-    timing.value = setTimeout(() => emit("startCarousel"), 4500); // 恢复轮播功能
+    timing.value = setTimeout(() => emit("startCarousel"), props.time); // 恢复轮播功能
   };
 })();
 onBeforeUnmount(() => {
