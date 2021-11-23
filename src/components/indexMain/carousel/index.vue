@@ -9,6 +9,7 @@
         <a
           @mouseenter="clearCarousel"
           @mouseleave="startCarousel"
+          @click="jumpRouter('carousel', item.productId)"
           href="javascript:void(0);"
           :style="{
             background: `url(${item?.imgSrc}) no-repeat`,
@@ -46,7 +47,7 @@
     ></transition>
     <carousel-arrow
       ref="arrow"
-      :arrowtop="arrowtop"
+      :imgheight="imgheight"
       :show="showArrow"
       v-model:id="id"
       @start-carousel="startCarousel"
@@ -89,6 +90,21 @@ export default defineComponent({
       showArrow: false, // 是否显示左右箭头
     };
   },
+  methods: {
+    /**
+     * 路由跳转(跳转至详情页)
+     * @param title - 该商品所属类型
+     * @param id - 该商品对应的id值
+     */
+    jumpRouter(title: string, id: number): void {
+      // 进入商品详情页折叠子导航栏
+      this.$router.push({
+        name: "detailsPage",
+        params: { title },
+        query: { id },
+      });
+    },
+  },
 });
 </script>
 
@@ -115,7 +131,6 @@ const temp: number = +props.imgwidth.replace("px", "");
  * 轮播图片的数量
  */
 let datasLen = computed(() => props.datas.length);
-const arrowtop: string = (+props.imgheight.replace("px", "") - 40) / 2 + "px"; // 轮播图左右切换箭头的上边距
 /**
  * 存储了setInterval函数，便于清除
  */
@@ -257,10 +272,10 @@ const isCarousel: () => void = (): void => {
       clearCarousel();
   }
 };
-// 添加该事件用来判断用户是否进入离开页面
-document.addEventListener("visibilitychange", isCarousel);
 
 onMounted((): void => {
+  // 添加该事件用来判断用户是否进入离开页面
+  document.addEventListener("visibilitychange", isCarousel);
   // 组件挂载时开始轮播
   startCarousel();
 });
