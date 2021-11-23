@@ -12,9 +12,12 @@ import {
   NFormItem,
   NInput,
   NMessageProvider,
+  NPopover,
+  NSpin,
 } from 'naive-ui'
 import $axios from "./plugins/axios"
 import $observer from "./plugins/observer"
+import $deepClone from "./plugins/deepClone"
 import collapseTransiton from "./components/functionalComponents/collapseTransition"
 
 const app: ReturnType<typeof createApp> = createApp(App);
@@ -27,6 +30,8 @@ const native: ReturnType<typeof create> = create({
     NButton,
     NMessageProvider,
     NAvatar,
+    NPopover,
+    NSpin,
   ],
 });
 
@@ -45,7 +50,7 @@ for (const [k, v] of globalComponent.entries()) {
 /**
  * 插件
  */
-const globalPlugins = [store, router, native, $axios, $observer];
+const globalPlugins = [store, router, native, $axios, $observer, $deepClone];
 for (const value of globalPlugins) {
   if (value === store) app.use(value, key)
   else app.use(value)
