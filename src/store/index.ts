@@ -2,7 +2,9 @@ import type { InjectionKey } from 'vue'
 import { createStore, useStore as baseStore, Store } from 'vuex'
 import { $axios } from '@/plugins/axios'
 import UserModule from "./modules/user"
-import type { RootState, AllState } from './interface' 
+import CartModule from "./modules/cart"
+import CommentModule from "./modules/comment"
+import type { RootState, AllState } from './interface'
 
 /* 定义类型化的 InjectionKey */
 export const key: InjectionKey<Store<RootState>> = Symbol()
@@ -23,9 +25,12 @@ function $http<T>(
     type: keyof RootState,): Promise<boolean> => {
     try {
       const { data } = await $axios([url, method, params]);
-      state[type] = data;
-      if (state[type]) return Promise.resolve(true)
-      return Promise.reject(false)
+      state[type] = data ? data : state[type];
+      if (
+        JSON.stringify(state[type]) === '[]' ||
+        JSON.stringify(state[type]) === '{}'
+      ) return Promise.reject(false)
+      return Promise.resolve(true)
     } catch (error) {
       console.log(error);
       return Promise.reject(false)
@@ -39,6 +44,7 @@ export default createStore<RootState>({
     carouselDatas: [],
     phoneDatas: {} as Phone,
     homeAppliances: {} as Phone,
+    commodityDetailsDatas: {} as CommodityDetails,
   }),
   mutations: {
   },
@@ -70,9 +76,18 @@ export default createStore<RootState>({
     getHomeAppliances({ state }): Promise<boolean> {
       return $http('/body', 'get', { title: '家电' })(state, 'homeAppliances');
     },
+    /**
+     * 请求商品详情数据
+     * @param state - 根部state属性
+     */
+    getCommodityDetailsDatas({ state }, payload: { id: number }): Promise<boolean> {
+      return $http('/detailsPage', 'get', { id: payload.id })(state, 'commodityDetailsDatas');
+    },
   },
   modules: {
     UserModule,
+    CartModule,
+    CommentModule,
   },
 })
 
