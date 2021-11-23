@@ -56,6 +56,19 @@ const routes: Array<RouteRecordRaw> = [
       document.title = to.meta.title;
     },
   },
+  {
+    // 购物车页面
+    name: 'cart',
+    path: '/cart',
+    component: () => import('@/views/cart/cart.vue'),
+    meta: {
+      title: '购物车'
+    },
+    beforeEnter(to) {
+      // 进入该路由前改变文档标题
+      document.title = to.meta.title;
+    },
+  },
 ]
 
 const router = createRouter({
