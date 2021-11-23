@@ -202,7 +202,7 @@ import backTop from "@/components/indexMain/backTop.vue";
 import comment from "./comments/comment.vue";
 import Skeleton from "@/components/ui-components/skeleton/skeleton.vue";
 import SkeletonItem from "@/components/ui-components/skeleton/skeletonItem.vue";
-import carouselDetailsPage from "./carousel/carouselndex.vue";
+import carouselDetailsPage from "./carousel/carouselIndex.vue";
 import { mapActions, mapState } from "vuex";
 import Cookie from "@/plugins/cookie";
 import { Base64 } from "js-base64";
