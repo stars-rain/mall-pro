@@ -4,7 +4,7 @@
     <div class="cart-container">
       <cart-main
         :cart-list="cartList"
-        @handler-selectids="handlerSelectids"
+        v-model:select-ids="selectIds"
         @handler-prompt="handlerPrompt"
         @handler-Dialog="handlerDialog"
         @handler-dele-id="handlerDeleId"
@@ -14,6 +14,7 @@
         :cart-list="cartList"
         @handler-prompt="handlerPrompt"
         @handler-Dialog="handlerDialog"
+        @handler-selectids="handlerSelectids"
       ></cart-footer>
     </div>
     <my-dialog v-model="showDialog">
@@ -186,8 +187,15 @@ const handleToCommodity: (mess: string) => void = (mess: string): void => {
         account: Base64.encode(store.state.UserModule.account),
       })
         .then((value: boolean) => {
-          if (value) $message.success("删除成功");
-          else $message.error("删除失败");
+          if (value) {
+            if (selectIds.value.length) {
+              selectIds.value.splice(
+                selectIds.value.findIndex((item) => item === deleId.value),
+                1
+              );
+            }
+            $message.success("删除成功");
+          } else $message.error("删除失败");
         })
         .catch(() => $message.error("删除失败"));
       break;
@@ -197,8 +205,10 @@ const handleToCommodity: (mess: string) => void = (mess: string): void => {
         account: Base64.encode(store.state.UserModule.account),
       })
         .then((value: boolean): void => {
-          if (value) $message.success("成功清空购物车");
-          else $message.error("清空失败");
+          if (value) {
+            if (selectIdsLen) selectIds.value.splice(0);
+            $message.success("成功清空购物车");
+          } else $message.error("清空失败");
         })
         .catch(() => $message.error("清空失败"));
       break;
@@ -209,8 +219,10 @@ const handleToCommodity: (mess: string) => void = (mess: string): void => {
           account: Base64.encode(store.state.UserModule.account),
         })
         .then((value: boolean) => {
-          if (value) $message.success("删除成功");
-          else $message.error("删除失败");
+          if (value) {
+            $message.success("删除成功");
+            selectIds.value.splice(0);
+          } else $message.error("删除失败");
         })
         .catch(() => $message.error("删除失败"));
       break;

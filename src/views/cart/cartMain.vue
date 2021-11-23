@@ -125,7 +125,6 @@ import {
   computed,
   ref,
   defineEmits,
-  reactive,
   watch,
 } from "@vue/runtime-core";
 import headerDatas from "@/staticDatas/cartHeaTitDatas";
@@ -164,9 +163,10 @@ const store = useStore();
 const props = defineProps<{
   // eslint-disable-next-line no-undef
   cartList: Array<CartItem>; // 购物车数据列表
+  selectIds: Array<number>; // 当前所勾选的商品的id集合
 }>();
 const emits = defineEmits<{
-  (e: "handlerSelectids", ids: Array<number>): void; // 通知父组件用户所勾选的商品id集合以改变
+  (e: "update:selectIds", ids: Array<number>): void; // 通知父组件用户所勾选的商品id集合以改变
   (e: "handlerDeleId", id: number): void; // 通知父组件改变用户当前需要删除的商品id值
   (e: "handlerPrompt", mess: string): void; // 通知父组件改变对话框的提示
   (e: "handlerDialog", show: boolean): void; // 通知父组件改变对话框的状态
@@ -183,12 +183,22 @@ let showSeleAll = ref<boolean>(false);
 /**
  * 当前所勾选的商品的id集合
  */
-let currSelectIds = reactive<Array<number>>([]);
+let currSelectIds = ref<Array<number>>([]);
 // 监听当前已勾选商品的id集合，以便通知父组件对应改变其值
 watch(
-  (): Array<number> => currSelectIds,
+  (): Array<number> => currSelectIds.value,
   (newValue: Array<number>): void => {
-    emits("handlerSelectids", newValue);
+    emits("update:selectIds", newValue);
+  },
+  {
+    deep: true,
+  }
+);
+
+watch(
+  (): Array<number> => props.selectIds,
+  (newValue: Array<number>): void => {
+    currSelectIds.value = newValue;
   },
   {
     deep: true,
@@ -202,12 +212,13 @@ const selectAll: () => void = (): void => {
   if (!cartDiffLen.value) return; // 如果购物车中无数据则直接返回
   showSeleAll.value = !showSeleAll.value;
   // 如果此时所有商品都被选中则取消选中
-  if (currSelectIds.length === cartDiffLen.value) {
-    currSelectIds.splice(0);
+  if (currSelectIds.value.length === cartDiffLen.value) {
+    currSelectIds.value.splice(0);
     return;
   }
   props.cartList.forEach((item) => {
-    if (!currSelectIds.includes(item.id)) currSelectIds.push(item.id);
+    if (!currSelectIds.value.includes(item.id))
+      currSelectIds.value.push(item.id);
   });
 };
 /**
@@ -216,15 +227,16 @@ const selectAll: () => void = (): void => {
  */
 const checkToItem: (id: number) => void = (id: number): void => {
   // 如果id集合中已经包括了此id值的话就移除否则加入
-  if (currSelectIds.includes(id)) {
-    currSelectIds.splice(
-      currSelectIds.findIndex((item) => item === id),
+  if (currSelectIds.value.includes(id)) {
+    currSelectIds.value.splice(
+      currSelectIds.value.findIndex((item) => item === id),
       1
     );
     if (showSeleAll.value) showSeleAll.value = false; // 如果此时全被选中则取消全选
   } else {
-    currSelectIds.push(id);
-    if (currSelectIds.length === cartDiffLen.value) showSeleAll.value = true;
+    currSelectIds.value.push(id);
+    if (currSelectIds.value.length === cartDiffLen.value)
+      showSeleAll.value = true;
   }
 };
 
