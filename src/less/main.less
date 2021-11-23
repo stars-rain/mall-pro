@@ -69,3 +69,41 @@ a {
         color: extract(@colors, 1);
     }
 }
+
+.aColor {
+    color     : extract(@colors, 1);
+    transition: color 0.2s;
+
+    &:hover {
+        color: extract(@colors, 3);
+    }
+}
+
+.noselect() {
+    -webkit-user-select: none;
+    -moz-user-select   : none;
+    -ms-user-select    : none;
+    user-select        : none;
+}
+
+.submit() {
+    border-radius   : 3px;
+    background-color: extract(@colors, 3);
+    color           : extract(@colors, 4);
+    transition      : background-color 0.25s ease-in;
+    border          : 0;
+    cursor          : pointer;
+    .noselect();
+
+    &:hover {
+        background-color: #f58134;
+        transition      : background-color 0.35s ease-out;
+    }
+}
+
+.cardSty() {
+    background-color: extract(@colors, 4);
+    border-radius   : 3px;
+    box-shadow      : 0 1px 2px -2px rgb(0 0 0 / 8%), 0 3px 6px 0 rgb(0 0 0 / 6%),
+        0 5px 12px 4px rgb(0 0 0 / 4%);
+}
