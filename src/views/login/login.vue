@@ -330,7 +330,7 @@ const validateForm: (title: string) => void = (title: string): void => {
               } else if (res.data.status === "error") {
                 // 登录验证失败则账号输入框聚焦
                 nextTick(() => userAccount.value?.focus());
-                $message.error(res.data.messages.reason);
+                $message.error(res.data.reason);
               }
             }, 1000);
           })
@@ -366,11 +366,11 @@ const validateForm: (title: string) => void = (title: string): void => {
                 });
               } else if (res.data.status === "error") {
                 // 返回的错误信息
-                const mess: string = res.data.messages.reason;
+                const mess: string = res.data.reason;
                 if (mess === "账号已存在")
                   nextTick(() => userAccount.value?.focus());
                 else nextTick(() => userName.value?.focus());
-                $message.error(res.data.messages.reason);
+                $message.error(mess);
               }
             }, 1000);
           })
@@ -442,7 +442,7 @@ const validateInput: (
   (rules: FormItemRule, value: string): boolean | Error => {
     value = value.trim();
     if (!value && title !== "重复密码") return new Error(`${title}不能为空`);
-    else if (!value.match(/^[a-zA-Z0-9_\\.]{1,}$/g) && title !== '用户名')
+    else if (!value.match(/^[a-zA-Z0-9_\\.]{1,}$/g) && title !== "用户名")
       return new Error(`${title}只能由字母、数字、小数点和下划线组成`);
     else if (
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
