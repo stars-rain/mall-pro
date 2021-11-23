@@ -65,7 +65,7 @@
         class="dialog-input__item"
         placeholder="请输入新收货地址"
         :maxlength="40"
-        @keyup.enter.prevent="submit(opeartionType)"
+        @keypress.enter.prevent="submit(opeartionType)"
         :value="form.address?.trim()"
         @input="form.address = $event"
       />
@@ -86,6 +86,7 @@ import {
   reactive,
   onMounted,
   onBeforeUnmount,
+  defineExpose,
 } from "@vue/runtime-core";
 import { useState, useMutations } from "@/vuexHooks";
 import type { NInput, NForm, FormRules, FormItemRule } from "naive-ui";
@@ -192,6 +193,7 @@ const $http: <T>(
         }, 1000);
       })
       .catch((error) => {
+        emits("update:loading", false); // 结束加载动画
         $message.error(errorMess as string); // 弹出失败操作后的提示内容
         resolve(false);
         console.log(error);
@@ -219,9 +221,10 @@ const submit: (type: string) => void = (type: string): void => {
         const usr = {
           account: Base64.encode(account.value),
           name: Base64.encode(form.name.trim()),
+          type: 1,
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          ["/modifyReceInfo", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -241,9 +244,10 @@ const submit: (type: string) => void = (type: string): void => {
         const usr = {
           account: Base64.encode(account.value),
           telephone: Base64.encode(form.telephone),
+          type: 2,
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          ["/modifyReceInfo", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -263,9 +267,10 @@ const submit: (type: string) => void = (type: string): void => {
         const usr = {
           account: Base64.encode(account.value),
           address: Base64.encode(form.address.trim()),
+          type: 3,
         };
         $http(
-          ["", "post", { params: Base64.encode(JSON.stringify(usr)) }],
+          ["/modifyReceInfo", "post", { params: Base64.encode(JSON.stringify(usr)) }],
           "修改成功",
           "修改失败"
         ).then((res: boolean): void => {
@@ -279,6 +284,9 @@ const submit: (type: string) => void = (type: string): void => {
     }
   });
 };
+
+// 暴露该组件的属性以便其它组件访问
+defineExpose({ submit });
 
 /**
  * 修改用户名，设置真实姓名、电话以及地址输入框的验证
@@ -368,5 +376,6 @@ onBeforeUnmount(() => {
   padding-right: 35px;
   font-size: 10px;
   color: #c0c4cc;
+  .noselect();
 }
 </style>
