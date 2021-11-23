@@ -85,7 +85,7 @@
         class="dialog-input"
         placeholder="请输入收货地址"
         :maxlength="40"
-        @keyup.enter.prevent="submit(opeartionType)"
+        @keypress.enter.prevent="submit(opeartionType)"
         :value="form.address.trim()"
         @input="form.address = $event"
       />
@@ -179,6 +179,7 @@ import {
   onMounted,
   defineEmits,
   onBeforeUnmount,
+  defineExpose,
 } from "@vue/runtime-core";
 import type {
   NInput,
@@ -430,6 +431,7 @@ const $http: <T>(
         }, 1000);
       })
       .catch((error) => {
+        emits("update:loading", false); // 关闭加载动画
         $message.error(errorMess as string);
         resolve(false);
         console.log(error);
@@ -452,6 +454,7 @@ const submit: (type: string) => void = (type: string): void => {
         if (form.username.trim() === userName.value) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧用户名不能相同");
+          user_nameRef.value?.focus(); // 用户名输入框聚焦
           return;
         }
         const usr = {
@@ -522,6 +525,7 @@ const submit: (type: string) => void = (type: string): void => {
         ) {
           emits("update:loading", false); // 结束加载动画
           $message.error("新旧收货信息不能相同");
+          nameRef.value?.focus(); // 用户名输入框聚焦
           return;
         }
         const usr = {
@@ -556,6 +560,9 @@ const submit: (type: string) => void = (type: string): void => {
     }
   });
 };
+
+// 暴露该组件的属性以便其它组件访问
+defineExpose({ submit });
 
 onMounted(() => {
   timing.value = setTimeout(() => {

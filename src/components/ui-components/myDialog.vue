@@ -2,15 +2,25 @@
   <teleport to="body">
     <template v-if="showDialogBox">
       <transition name="dialog-fade">
-        <div v-show="showDialog" ref="mask" class="mask-layer">
+        <div
+          v-show="showDialog"
+          ref="mask"
+          :class="{ 'mask-layer': true, isMask: maskable }"
+        >
           <div class="dialog-box flex">
             <transition name="dialog-content">
-              <div ref="dialog" v-show="showDialog" class="dialog">
-                <div class="dialog-header">
+              <div
+                ref="dialog"
+                v-dialogDrag="{ draggable, focus, }"
+                v-show="showDialog"
+                class="dialog"
+              >
+                <div :class="{ 'dialog-header': true, draggle: draggable }">
                   <span v-if="title" class="dialog-header__title">
                     <svg-icon
                       popper-class="icon-notify"
                       :icon-class="titleType"
+                      v-if="showIcon"
                     ></svg-icon>
 
                     {{ title }}</span
@@ -21,6 +31,7 @@
                     @click="closeDialog"
                   ></svg-icon>
                 </div>
+                <div v-if="dividerable" class="dialog-header__divider"></div>
                 <slot></slot>
                 <div class="dialog-footer">
                   <slot name="footer"></slot>
@@ -38,47 +49,71 @@ import {
   ref,
   onBeforeUnmount,
   watch,
-  toRef,
+  toRefs,
   nextTick,
 } from "@vue/runtime-core";
 import SvgIcon from "../svgIcon/index.vue";
+import dialogDrag from "@/directives/dialogDrag";
 
 export default defineComponent({
   name: "my-dialog",
   props: {
-    /**
-     * 是否可以通过点击关闭图标而关闭对话框
-     */
+    // 是否可以通过点击关闭图标而关闭对话框
     close: {
       type: Boolean,
       default: true,
     },
-    /**
-     * 是否显示对话框
-     */
+    // 是否显示对话框
     modelValue: {
       type: Boolean,
       default: false,
     },
-    /**
-     * 对话框的标题
-     */
+    // 对话框的标题
     title: {
       type: String,
       default: "",
     },
-    /**
-     * 对话框的标题类型
-     */
+    // 对话框的标题类型
     titleType: {
       type: String,
       default: "notify",
+    },
+    // 是否是需要遮罩层
+    maskable: {
+      type: Boolean,
+      default: true,
+    },
+    // 是否头部显示图标
+    showIcon: {
+      type: Boolean,
+      default: true,
+    },
+    // 是否需要标题分割线
+    dividerable: {
+      type: Boolean,
+      defualt: false,
+    },
+    // 对话框是否可以拖动
+    draggable: {
+      type: Boolean,
+      default: false,
+    },
+    // 是否点击遮罩层可以关闭对话框
+    maskClosable: {
+      type: Boolean,
+      default: true,
     },
   },
   emits: {
     ["update:modelValue"]<T>(show: T): boolean {
       return typeof show === "boolean";
     },
+    moveFocus(): boolean {
+      return true
+    },
+  },
+  directives: {
+    dialogDrag,
   },
   setup(props, { emit }) {
     /**
@@ -88,7 +123,7 @@ export default defineComponent({
     /**
      * 是否显示对话框(来自父组件)
      */
-    let modelValue = toRef(props, "modelValue");
+    let { modelValue, maskClosable, close } = toRefs(props);
     /**
      * 当前是否显示对话框(自身组件单独维护)
      */
@@ -142,8 +177,8 @@ export default defineComponent({
           }px`;
           nextTick(() => {
             showDialog.value = true;
-            // 给遮罩层元素监听鼠标点击事件
-            addClickEvent();
+            // 给遮罩层元素监听鼠标点击事件(如果点击遮罩层可以关闭对话框)
+            if (maskClosable.value) addClickEvent();
           });
         } else {
           document.body.style.cssText = "";
@@ -154,15 +189,11 @@ export default defineComponent({
       }
     );
 
-    /**
-     * 是否可以通过点击关闭图标而关闭对话框
-     */
-    let close = toRef(props, "close");
     watch(
       (): boolean => close.value,
       (value: boolean): void => {
         // 如果此时正在显示加载动画时移除对话框的click事件监听
-        if (!value) removeClickEvent();
+        if (!value && maskClosable.value) removeClickEvent();
         // 否则增加事件监听
         else addClickEvent();
       }
@@ -176,6 +207,13 @@ export default defineComponent({
       emit("update:modelValue", false);
     };
 
+    /**
+     * 内部是否有文本框需要聚焦
+     */
+    const focus: () => void = (): void => {
+      emit('moveFocus');
+    }
+
     onMounted(() => {
       // 初始化滚动条的宽度
       scrollBarHei.value =
@@ -183,16 +221,17 @@ export default defineComponent({
         globalThis.innerWidth -
         (document.body.clientWidth || document.documentElement.clientWidth);
     });
-    onBeforeUnmount(() => removeClickEvent());
+    onBeforeUnmount(() => {
+      if (maskClosable.value) removeClickEvent();
+    });
 
     return {
       dialog,
       showDialog,
       showDialogBox,
       mask,
-      addClickEvent,
-      removeClickEvent,
       closeDialog,
+      focus,
     };
   },
   components: { SvgIcon },
@@ -200,13 +239,19 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
+.draggle {
+  cursor: move;
+}
+.isMask {
+  background-color: #00000080;
+}
 .mask-layer {
   position: fixed;
   z-index: 5555;
+  left: 0;
   top: 0;
   bottom: 0;
-  width: 100%;
-  background-color: #00000080;
+  right: 0;
   overflow: auto;
 }
 .dialog {
@@ -236,20 +281,32 @@ export default defineComponent({
     transform: scale(0);
   }
 
-  position: relative;
+  position: absolute;
   width: 420px;
   background-color: extract(@colors, 4);
   border-radius: 2px;
   transition: background-color 0.5s;
   min-height: 150px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 
   &-header {
     position: relative;
-    padding: 15px 0 15px 30px;
+    padding: 10px 0 10px 30px;
+
+    &__divider {
+      .setWidHei(100%, 1px);
+      background-image: linear-gradient(
+        to right,
+        rgba(255, 0, 0, 0),
+        #c2bebecb,
+        rgba(255, 0, 0, 0)
+      );
+    }
 
     &__title {
       font-size: 17px;
       color: extract(@colors, 1);
+      .noselect();
 
       .icon-notify {
         margin-right: 5px;

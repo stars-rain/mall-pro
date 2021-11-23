@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType } from "@vue/runtime-core";
+import { defineComponent, ref, PropType, nextTick } from "@vue/runtime-core";
 import myDialog from "@/components/ui-components/myDialog.vue";
 import avatarUpload from "./avatarUpload.vue";
 import outClose from "@/directives/vueClickClose";
@@ -96,7 +96,9 @@ import Cookie from "@/plugins/cookie";
 import { useMessage } from "naive-ui";
 import { useState, useMutations } from "@/vuexHooks";
 import { $axios } from "@/plugins/axios";
+import { useStore } from "@/store/index";
 
+const store = useStore();
 const { userName, avatarSrc } = useState(
   ["userName", "avatarSrc"],
   "UserModule"
@@ -153,6 +155,9 @@ const quitLogin: () => void = (): void => {
     .then((res) => {
       if (res.data.status === "success") {
         Cookie.deleteCookie(); // 删除Cookie
+        store.commit("CartModule/$_clearCart"); // 清除vuex中的购物车数据
+        if (store.state.CartModule.status !== 1)
+          store.commit("CartModule/handleToStatus", { status: 1 }); // 改变购物车的状态为更改状态，用于下次登录会向后台请求购物车数据
         Promise.all([
           handleToUserName(), // 清除保存的用户名
           handleToAvatar(), // 将用户的头像路径改为默认路径

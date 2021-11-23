@@ -7,4 +7,9 @@ interface UserOpearMenu {
     iconClass: string;
 }
 
-export { UserOpearMenu }
+interface Emotion {
+    id: number;
+    emotion: string;
+}
+
+export { UserOpearMenu, Emotion }

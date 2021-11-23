@@ -24,62 +24,127 @@
     ></collapse-transition>
     <div class="details">
       <div class="details-box">
-        <div class="details-body container clearfix">
-          <div class="details-body--img flex">
-            <img src="../../../public/reglogbagimg.jpg" alt="无法加载此图片" />
-          </div>
-          <div class="details-body--content">
-            <h2 class="details-name">小米电视6 65″OLED</h2>
-            <p class="details-desc">
-              【立即预约5号到手价6999元！3期免息】【5号电视品类日】【价保30天，买贵补差】4K
-              OLED,更薄更清晰,0nit极夜黑,低蓝光认证,全场景互联
-            </p>
-            <p class="details-price">99999元起</p>
-            <div class="details-card">
-              <div class="card-title">收货信息</div>
-              <div class="user-messages">
-                <p class="user-messages__item">
-                  <svg-icon
-                    popper-class="user-icon__messages"
-                    icon-class="receiver"
-                  ></svg-icon>
-                  <span>收货人：</span>{{ name ? name : "请设置收货人" }}
-                  <span
-                    class="user-messages__modify"
-                    @click="handleToMess('修改收货人姓名')"
-                    >修改</span
-                  >
+        <div class="details-body container">
+          <Skeleton :loading="loading" animated>
+            <template #skeleton>
+              <div class="clearfix">
+                <div class="details-body--img flex">
+                  <skeleton-item
+                    :width="400"
+                    :height="400"
+                    type="img"
+                  ></skeleton-item>
+                </div>
+                <div class="details-body--content">
+                  <skeleton-item width="100%"></skeleton-item>
+                  <div style="margin: 30px 0">
+                    <skeleton-item
+                      style="display: inline-block; margin-bottom: 0"
+                      :width="70"
+                    ></skeleton-item>
+                    <skeleton-item
+                      style="
+                        margin-left: 20px;
+                        display: inline-block;
+                        margin-bottom: 0;
+                      "
+                      :width="70"
+                    ></skeleton-item>
+                  </div>
+                  <template v-for="index in 3" :key="index">
+                    <skeleton-item
+                      style="margin-bottom: 35px"
+                      :width="160"
+                    ></skeleton-item>
+                  </template>
+                  <skeleton-item
+                    type="button"
+                    style="margin-bottom: 0"
+                  ></skeleton-item>
+                </div>
+              </div>
+              <skeleton-item :width="80"></skeleton-item>
+              <skeleton-item
+                style="margin: 20px 0 30px 0"
+                width="60%"
+              ></skeleton-item>
+            </template>
+            <div class="clearfix">
+              <div
+                :class="{
+                  'details-body--img': true,
+                  'details-body--img__loading': !loading,
+                }"
+              >
+                <carousel-details-page
+                  :datas="commodityDetailsDatas.imgDetails"
+                  width="90%"
+                  :height="400"
+                ></carousel-details-page>
+              </div>
+              <div class="details-body--content">
+                <h2 class="details-name">{{ commodityDetailsDatas.name }}</h2>
+                <p class="details-desc">
+                  {{ commodityDetailsDatas.saleDesc }}
                 </p>
-                <p class="user-messages__item">
-                  <svg-icon
-                    popper-class="user-icon__messages"
-                    icon-class="cellPhone"
-                  ></svg-icon>
-                  <span>电话号码：</span
-                  >{{ telephone ? telephone : "请设置手机号码"
-                  }}<span
-                    class="user-messages__modify"
-                    @click="handleToMess('修改手机号码')"
-                    >修改</span
-                  >
+                <p class="details-price">
+                  <span class="details-price--cur">
+                    {{ commodityDetailsDatas.curPrice }}
+                  </span>
+                  <del class="details-price--ori">{{
+                    commodityDetailsDatas.oriPrice
+                  }}</del>
                 </p>
-                <p class="user-messages__item">
-                  <svg-icon
-                    popper-class="user-icon__messages"
-                    icon-class="location"
-                  ></svg-icon>
-                  <span>收货地址：</span
-                  >{{ address ? address : "请设置收货地址"
-                  }}<span
-                    class="user-messages__modify"
-                    @click="handleToMess('修改收货地址')"
-                    >修改</span
-                  >
-                </p>
+                <div class="details-card">
+                  <div class="card-title">收货信息</div>
+                  <div class="user-messages">
+                    <p class="user-messages__item">
+                      <svg-icon
+                        popper-class="user-icon__messages"
+                        icon-class="receiver"
+                      ></svg-icon>
+                      <span>收货人：</span>{{ name ? name : "请设置收货人" }}
+                      <span
+                        class="user-messages__modify"
+                        @click="handleToMess('修改收货人姓名')"
+                        >修改</span
+                      >
+                    </p>
+                    <p class="user-messages__item">
+                      <svg-icon
+                        popper-class="user-icon__messages"
+                        icon-class="cellPhone"
+                      ></svg-icon>
+                      <span>手机号码：</span
+                      >{{ telephone ? telephone : "请设置手机号码"
+                      }}<span
+                        class="user-messages__modify"
+                        @click="handleToMess('修改手机号码')"
+                        >修改</span
+                      >
+                    </p>
+                    <p class="user-messages__item">
+                      <svg-icon
+                        popper-class="user-icon__messages"
+                        icon-class="location"
+                      ></svg-icon>
+                      <span>收货地址：</span
+                      >{{ address ? address : "请设置收货地址"
+                      }}<span
+                        class="user-messages__modify"
+                        @click="handleToMess('修改收货地址')"
+                        >修改</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <button class="add-cart" @click="addCart">加入购物车</button>
               </div>
             </div>
-            <button class="add-cart">加入购物车</button>
-          </div>
+            <n-message-provider>
+              <comment :title="'小米电视6 65″OLED'"></comment>
+            </n-message-provider>
+          </Skeleton>
         </div>
       </div>
     </div>
@@ -114,6 +179,7 @@
         </template>
       </my-dialog></n-message-provider
     >
+    <back-top></back-top>
   </loading-bar>
 </template>
 
@@ -121,27 +187,28 @@
 import {
   defineComponent,
   defineProps,
-  watchEffect,
   computed,
   ref,
   watch,
+  onBeforeUnmount,
+  provide,
+  readonly,
 } from "@vue/runtime-core";
 import mallHeader from "@/components/header/header.vue";
 import headerFooter from "@/components/header/footer.vue";
+import myDialog from "@/components/ui-components/myDialog.vue";
+import userFormItem from "./userFormItem.vue";
+import backTop from "@/components/indexMain/backTop.vue";
+import comment from "./comments/comment.vue";
+import Skeleton from "@/components/ui-components/skeleton/skeleton.vue";
+import SkeletonItem from "@/components/ui-components/skeleton/skeletonItem.vue";
+import carouselDetailsPage from "./carousel/carouselIndex.vue";
 import { mapActions, mapState } from "vuex";
 import Cookie from "@/plugins/cookie";
 import { Base64 } from "js-base64";
-import myDialog from "@/components/ui-components/myDialog.vue";
-import userFormItem from "./userFormItem.vue";
 
 export default defineComponent({
   name: "detailsPage",
-  components: {
-    mallHeader,
-    headerFooter,
-    myDialog,
-    userFormItem,
-  },
   data() {
     return {
       // 是否显示确认按钮的加载动画
@@ -154,11 +221,17 @@ export default defineComponent({
     commodityTypesDatas(): Array<CommodityTypes> {
       return this.$store.state.commodityTypesDatas;
     },
+    // 商品详情数据
+    // eslint-disable-next-line no-undef
+    commodityDetailsDatas(): CommodityDetails {
+      return this.$store.state.commodityDetailsDatas;
+    },
     ...mapState("UserModule", ["name", "telephone", "address"]),
   },
   methods: {
     ...mapActions([
       "getCommodityTypesDatas", // 请求头部商品分类导航数据
+      "getCommodityDetailsDatas", // 请求商品详情数据
     ]),
   },
   beforeMount() {
@@ -184,6 +257,7 @@ export default defineComponent({
             })
           : null,
         this.getCommodityTypesDatas(),
+        this.getCommodityDetailsDatas({ id: +(this.$props as any).id }),
       ])
         .then((res: boolean[]) => {
           // 数据全部获取成功则关闭加载条
@@ -192,24 +266,51 @@ export default defineComponent({
         .catch(() => this.$router.replace("/404")); // 获取失败则定位到404页面
     });
   },
-  watch: {},
 });
 </script>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router";
+import { onBeforeRouteUpdate } from "vue-router";
 import { useMessage } from "naive-ui";
 import { useStore } from "@/store/index";
-// import { $axios } from "@/plugins/axios";
 
 const store = useStore();
-const route = useRoute();
 const $message = useMessage();
 
-defineProps<{
-  id: string;
-  title: string;
+const props = defineProps<{
+  id: string; // 商品的唯一id值
+  title: string; // 商品所属类型
 }>();
+let currentId = ref<number>(+props.id);
+
+watch(
+  (): string => props.id,
+  (newValue: string): void => {
+    currentId.value = +newValue;
+  }
+)
+
+// 提供该商品id给内部组件用
+provide('id', readonly(currentId));
+
+/**
+ * 是否加载骨架屏
+ */
+let loading = ref<boolean>(false);
+/**
+ * 保存计时函数如：setTimeout
+ */
+let timing = ref<number>(0);
+onBeforeRouteUpdate((to): void => {
+  // 开始加载骨架屏
+  loading.value = true;
+  // 更新数据
+  store
+    .dispatch("getCommodityDetailsDatas", { id: to.query.id })
+    .then((value: boolean) => {
+      if (value) timing.value = setTimeout(() => (loading.value = false), 400);
+    });
+});
 /**
  * 用户是否登录
  */
@@ -245,6 +346,10 @@ let user_formItem = ref<InstanceType<typeof userFormItem>>();
  * * @param type - 修改信息的类型
  */
 const handleToMess: (type: string) => void = (type: string): void => {
+  if (!store.state.UserModule.isLogin) {
+    $message.error("请先登录");
+    return;
+  }
   currentOpeartion.value = type; // 用户当前修改信息的类型
   showDialog.value = true; // 打开对话框
 };
@@ -256,8 +361,46 @@ const submit: (type: string) => void = (type: string): void => {
   (user_formItem.value as any).submit(type);
 };
 
-watchEffect(() => {
-  console.log(route.params.title, route.query.id);
+// 加入购物车
+const addCart: () => void = (function (): () => void {
+  // 节流
+  let debounce: boolean = false;
+  return (): void => {
+    if (debounce) return;
+    debounce = true;
+    if (!store.state.UserModule.isLogin) {
+      $message.error("请先登录");
+      debounce = false;
+      return;
+    }
+    // 向后台发送数据
+    store
+      .dispatch("CartModule/sendCartDatas", {
+        account: Base64.encode(store.state.UserModule.account),
+        id: currentId.value,
+      })
+      .then((value: boolean): void => {
+        if (value) {
+          $message.success("成功加入购物车");
+          if (store.state.CartModule.status !== 1)
+            store.commit("CartModule/handleToStatus", { status: 1 }); // 用户成功修改了购物车状态
+        } else $message.error("加入购物车失败");
+        timing.value = setTimeout(() => {
+          debounce = false;
+        }, 300);
+      })
+      .catch(
+        () =>
+          (timing.value = setTimeout(() => {
+            debounce = false;
+            $message.error("加入购物车失败");
+          }, 300))
+      );
+  };
+})();
+
+onBeforeUnmount(() => {
+  if (timing.value) clearTimeout(timing.value);
 });
 </script>
 
@@ -268,6 +411,7 @@ watchEffect(() => {
 
   &-box {
     background-color: #f5f5f5;
+    padding-bottom: 10px;
   }
 
   &-buy--prompt {
@@ -290,16 +434,17 @@ watchEffect(() => {
     &--img {
       .setWidHei(50%, 400px);
       float: left;
+      overflow: hidden;
 
-      img {
-        .setWidHei(80%, 80%);
+      &__loading {
+        background-color: extract(@colors, 4);
       }
     }
 
     &--content {
-      .setWidHei(50%, 400px);
+      width: 50%;
       box-sizing: border-box;
-      padding: 0 10px;
+      padding: 0 15px;
       float: right;
     }
   }
@@ -316,7 +461,15 @@ watchEffect(() => {
 
   &-price {
     font-size: 18px;
-    color: extract(@colors, 3);
+
+    &--cur {
+      color: extract(@colors, 3);
+    }
+
+    &--ori {
+      color: #b0b0b0;
+      margin-left: 8px;
+    }
   }
 
   &-card {
@@ -373,16 +526,6 @@ watchEffect(() => {
 .add-cart {
   margin: 30px 0 0 10px;
   padding: 12px 15px;
-  border-radius: 3px;
-  background-color: extract(@colors, 3);
-  color: extract(@colors, 4);
-  transition: background-color 0.25s ease-in;
-  border: 0;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #f58134;
-    transition: background-color 0.35s ease-out;
-  }
+  .submit();
 }
 </style>

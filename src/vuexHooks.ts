@@ -1,4 +1,4 @@
-import { createNamespacedHelpers, mapState, mapMutations } from "vuex"
+import { createNamespacedHelpers, mapState, mapMutations, mapActions } from "vuex"
 import { useStore } from "./store/index"
 import { computed } from "vue"
 
@@ -72,4 +72,21 @@ const useMutations: <T extends { [key: string]: any }>(mapper: T, moduleName?: s
         return useMapper(mappFn(mapper), { isMapMutations: true, isMapState: false })
     }
 
-export { useState, useMutations }
+/**
+* 通过mapMutations辅助函数获取vuex里面state属性的数据
+* @param mapper - 需要通过vuex辅助函数访问的数据属性(可能是一个数组或者一个对象)
+* @param moduleName - 模板名称(如果有模板的话)
+* @returns 返回经过useMapper函数处理后返回的相应的数据对象值
+*/
+const useActions: <T extends { [key: string]: any }>(mapper: T, moduleName?: string)
+    => any = <T extends { [key: string]: any }>(mapper: T, moduleName?: string): any => {
+        let mappFn = mapActions;
+        if (moduleName) {
+            // 调用对应模板的mapMutations
+            const { mapActions } = createNamespacedHelpers(moduleName);
+            mappFn = mapActions;
+        }
+        return useMapper(mappFn(mapper), { isMapMutations: true, isMapState: false })
+    }
+
+export { useState, useMutations, useActions }

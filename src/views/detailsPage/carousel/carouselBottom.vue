@@ -4,14 +4,14 @@
       v-for="(count, index) in datasLen"
       :key="count"
       :class="{
-        circle: true,
-        'circle-nolast': count !== datasLen,
-        'circle-active':
-          index === id ||
-          (index === 0 && id === 4) ||
-          (index === datasLen - 1 && id === -1),
+        'bottom-type': true,
+        'bottom-circle': type === 'circle',
+        'bottom-rect': type === 'rect',
+        'bottom-nolast': count !== datasLen,
+        'bottom-circle--active': index + 1 === id && type === 'circle',
+        'bottom-rect--active': index + 1 === id && type === 'rect',
       }"
-      @click="handleToId(index)"
+      @click="handleToId(index + 1)"
     ></li>
   </ul>
 </template>
@@ -41,33 +41,24 @@ const props = withDefaults(
      */
     id?: number;
     /**
-     * 是否需要重新滚动到第一张图片(当前所显示轮播图片已经是最后一张且继续向下切换时重新回到第一张图片)
-     */
-    theone?: boolean;
-    /**
-     * 是否需要重新滚动到最后一张图片(当前所显示轮播图片已经是第一张且继续向上切换时重新回到最后一张图片)
-     */
-    thelast?: boolean;
-    /**
      * 恢复轮播的时间
      */
     time?: number;
+    type?: string; // 按钮类型
   }>(),
   {
     id: 0,
     theone: false,
     thelast: false,
     time: 4500,
+    type: "circle",
   }
 );
-const emit =
-  defineEmits<{
-    (e: "update:id", id: number): void;
-    (e: "startCarousel"): void;
-    (e: "clearCarousel"): void;
-    (e: "update:theone", show: boolean): void;
-    (e: "update:thelast", show: boolean): void;
-  }>();
+const emit = defineEmits<{
+  (e: "update:id", id: number): void;
+  (e: "startCarousel"): void;
+  (e: "clearCarousel"): void;
+}>();
 
 /**
  * 存储了setTimeout函数，便于清除
@@ -96,8 +87,6 @@ const handleToId: (id: number) => void = (function (): (id: number) => void {
   return (id: number): void => {
     if (debounce) return;
     debounce = true;
-    if (props.theone) emit("update:theone", false); // 隐藏第一张轮播图片(并非是轮播元素的第一张轮播图片)
-    if (props.thelast) emit("update:theone", false); // 隐藏最后一张轮播图片(并非是轮播元素的最后一张轮播图片)
     emit("clearCarousel"); // 当前用户点击圆圈切换图片时清除轮播
     clearTiming(); // 清除恢复轮播功能
     if (id !== props.id) emit("update:id", id); // 改变当前显示图片的id值
@@ -111,35 +100,55 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="less" scoped>
+.bkcolors() {
+  background: hsla(0, 0%, 100%, 0.4);
+  border-color: rgba(0, 0, 0, 0.4);
+}
 .carousel {
   &-bottom {
     position: absolute;
-    bottom: 15px;
+    bottom: 5px;
     left: 50%;
     transform: translate3d(-50%, 0, 0);
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+.bottom {
+  &-type {
+    cursor: pointer;
+    transition: background-color 0.4s;
+  }
 
-    .bkcolors() {
-      background: hsla(0, 0%, 100%, 0.4);
-      border-color: rgba(0, 0, 0, 0.4);
+  &-nolast {
+    margin-right: 14px;
+  }
+
+  &-circle {
+    .setWidHei(6px, 6px);
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 2px solid hsla(0, 0%, 100%, 0.3);
+    &:hover {
+      .bkcolors();
     }
-    .circle {
-      .setWidHei(6px, 6px);
-      border-radius: 20px;
-      border: 2px solid hsla(0, 0%, 100%, 0.3);
-      background-color: rgba(0, 0, 0, 0.4);
-      cursor: pointer;
 
-      &:hover {
-        .bkcolors();
-      }
+    &--active {
+      .bkcolors();
+    }
+  }
 
-      &-nolast {
-        margin-right: 14px;
-      }
+  &-rect {
+    .setWidHei(40px, 4px);
+    background-color: #ccc;
 
-      &-active {
-        .bkcolors();
-      }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.514);
+    }
+
+    &--active {
+      background-color: rgba(0, 0, 0, 0.514);
     }
   }
 }

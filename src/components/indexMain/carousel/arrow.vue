@@ -25,6 +25,7 @@ import {
   ref,
   watchEffect,
   onBeforeUnmount,
+  onMounted,
 } from "@vue/runtime-core";
 
 export default defineComponent({
@@ -35,22 +36,23 @@ export default defineComponent({
 <script lang="ts" setup>
 const props = withDefaults(
   defineProps<{
-    arrowtop: string; // 轮播图左右切换箭头的上边距
     show?: boolean; // 是否显示切换箭头
     id?: number; // 当前所显示轮播图片的id值
+    time?: number; // 恢复轮播的时间
+    imgheight: string | number; // 轮播图的高度
   }>(),
   {
     show: false,
     id: 0,
+    time: 4500,
   }
 );
 
-const emit =
-  defineEmits<{
-    (e: "update:id", id: number): void;
-    (e: "startCarousel"): void;
-    (e: "clearCarousel"): void;
-  }>();
+const emit = defineEmits<{
+  (e: "update:id", id: number): void;
+  (e: "startCarousel"): void;
+  (e: "clearCarousel"): void;
+}>();
 
 /**
  * 存储了setTimeout函数，便于清除
@@ -94,12 +96,20 @@ const switchImg: (count: number) => void = (function (): (
     emit("clearCarousel"); // 静止轮播
     currentId.value += count; // 轮播图片的id值+1或者-1
     emit("update:id", currentId.value); // 通知父组件的改变其id值
-    setTimeout(() => (debounce = false), 500); // 回复用户的切换图片功能
+    setTimeout(() => (debounce = false), 600); // 恢复用户的切换图片功能
     timing.value = setTimeout(() => {
       emit("startCarousel"); // 回复轮播功能
-    }, 4500);
+    }, props.time);
   };
 })();
+
+// 箭头距离父元素的顶部距离(用于垂直居中)
+let arrowtop = ref<string>(""); // 轮播图左右切换箭头的上边距
+onMounted(() => {
+  if (typeof props.imgheight === "string")
+    arrowtop.value = (+props.imgheight.replace("px", "") - 40) / 2 + "px";
+  else arrowtop.value = (props.imgheight - 40) / 2 + "px";
+});
 
 onBeforeUnmount(() => {
   // 组件卸载前清除这个计时功能
@@ -109,12 +119,7 @@ onBeforeUnmount(() => {
 
 <style lang="less" scoped>
 @direction: left, right;
-each(@direction, {
-    .@{value}-enter-active, .@{value}-leave-active {
-        transition: transform 3s ease-in-out;
-    }
-})
-  .come() {
+.come() {
   enter: from;
   leave: to;
 }

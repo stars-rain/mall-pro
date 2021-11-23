@@ -7,7 +7,7 @@
         :to="{
           name: 'detailsPage',
           params: { title },
-          query: { id: datas.product1?.id },
+          query: { id: datas.product1.productId },
         }"
       >
         <img
@@ -28,7 +28,7 @@
           :to="{
             name: 'detailsPage',
             params: { title },
-            query: { id: datas.product1?.id },
+            query: { id: datas.product1?.productId },
           }"
         >
           <img
@@ -48,7 +48,7 @@
           :to="{
             name: 'detailsPage',
             params: { title },
-            query: { id: datas.product2?.id },
+            query: { id: datas.product2?.productId },
           }"
         >
           <img
