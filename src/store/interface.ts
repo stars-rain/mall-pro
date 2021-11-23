@@ -1,24 +1,32 @@
-// 根部state属性
+/**
+ * 根部state属性
+ */
 interface RootState {
     /**
      * 头部商品分类导航数据
      */
-    commodityTypesDatas: Array<CommodityTypes>,
+    commodityTypesDatas: Array<CommodityTypes>;
     /**
      * 头部轮播图数据
      */
-    carouselDatas: Array<Carousel>,
+    carouselDatas: Array<Carousel>;
     /**
      * 手机模块的商品数据
      */
-    phoneDatas: Phone,
+    phoneDatas: Phone;
     /**
      * 家电模块的商品数据
      */
-    homeAppliances: Phone,
+    homeAppliances: Phone;
+    /**
+     * 商品详情数据
+     */
+    commodityDetailsDatas: CommodityDetails;
 }
 
-// login模块的state
+/**
+ * login模块的state
+ */
 interface UserState {
     isLogin: boolean; // 用户是否已经登录
     userName: string; // 用户的昵称
@@ -29,9 +37,28 @@ interface UserState {
     account: string; // 用户账号
 }
 
-// vuex各个state属性的集成
-interface AllState extends RootState {
-    UserModule: UserState;
+/**
+ * 购物车模块的state
+ */
+interface CartState {
+    status: number; // 判断用户是否修改购物车数据
+    cartList: Array<CartItem>;
 }
 
-export { RootState, UserState, AllState }
+/**
+ * 评论列表接口
+ */
+interface CommentState {
+    commentList: Array<Comments>;
+}
+
+/**
+ * vuex各个state属性的集成
+ */
+interface AllState extends RootState {
+    UserModule: UserState;
+    CartModule: CartState;
+    CommentModule: CommentState;
+}
+
+export { RootState, UserState, CartState, CommentState, AllState }
