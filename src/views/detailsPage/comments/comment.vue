@@ -14,12 +14,17 @@
           icon-class="smile"
         ></svg-icon></template
     ></n-input>
-    <comment-list :datas="commentListDatas" @is-comment="isComment"></comment-list>
+    <comment-list
+      v-if="commentListDatas.length"
+      :datas="commentListDatas"
+      @is-comment="isComment"
+    ></comment-list>
+    <comment-empty v-else></comment-empty>
   </div>
   <my-dialog
     v-model="showDialog"
     :maskable="false"
-    :title="status === 0 ? title : `回复@${repliedName}`"
+    :title="status === 0 ? title : `回复@${commentAttrs.repliedName}`"
     :dividerable="true"
     :show-icon="false"
     :draggable="true"
@@ -76,6 +81,7 @@ import {
   watch,
   customRef,
   computed,
+  reactive,
 } from "@vue/runtime-core";
 import myDialog from "@/components/ui-components/myDialog.vue";
 import commentList from "./commentList.vue";
@@ -83,6 +89,7 @@ import emotions from "./emotions.vue";
 import emotionsDatas from "@/staticDatas/emotions";
 import type { NInput } from "naive-ui";
 import type { Ref } from "@vue/runtime-core";
+import commentEmpty from "./commentEmpty.vue";
 
 export default defineComponent({
   name: "comment",
@@ -117,6 +124,9 @@ export default defineComponent({
         )[0] as HTMLAreaElement
       ).style.color = color;
     },
+  },
+  mounted() {
+    this.$store.commit('CommentModule/hideReplay'); // 隐藏回复的评论
   },
 });
 </script>
@@ -198,7 +208,7 @@ let buttonMess = computed(() => (status.value === 0 ? "评论" : "回复"));
  * 对话框中的文本域占位符信息
  */
 let placeMess = computed(() =>
-  status.value === 0 ? "请输入评论内容" : `回复@${repliedName.value}：`
+  status.value === 0 ? "请输入评论内容" : `回复@${commentAttrs.repliedName}：`
 );
 /**
  * 是否打开评论对话框
@@ -208,27 +218,36 @@ const $_openDialog: (open: boolean) => void = (open: boolean): void => {
   showDialog.value = open;
 };
 
-/**
- * 被回复评论的index索引值
- */
-let repliedIndex = ref<number>(0);
-/**
- * 被回复人的用户名
- */
-const repliedName = ref<string>("");
+let commentAttrs = reactive<{
+  type: number; // 如果用户回复的话是回复评论还是回复评论的评论(0代表回复评论)
+  commentIndex: number; // 被回复评论的index索引值
+  repliedName: string; // 被回复人的用户名
+}>({
+  type: 0,
+  commentIndex: 0,
+  repliedName: "",
+});
 /**
  * 用户准备评论还是回复评论
  * @param type - 代表用户准备评论(0代表评论)
- * @param name - 被回复评论的用户名字
- * @param id - 被回复评论的id值
+ * @param genres - 用户是回复评论还是回复评论的评论
+ * @name - 被回复评论的用户名字
+ * @param id - 被回复评论的索引值
  */
-const isComment: (type: number, name?: string, index?: number) => void = (
+const isComment: (
   type: number,
+  genres?: number,
+  name?: string,
+  index?: number
+) => void = (
+  type: number,
+  genres?: number,
   name?: string,
   index?: number
 ): void => {
-  if (typeof name === "string") repliedName.value = name;
-  if (typeof index === "number") repliedIndex.value = index;
+  if (typeof name === "string") commentAttrs.repliedName = name;
+  if (typeof index === "number") commentAttrs.commentIndex = index;
+  if (typeof genres === "number") commentAttrs.type = genres;
   status.value = type; // 改变状态码
   $_openDialog(true); // 打开对话框
 };
@@ -252,15 +271,34 @@ const submitComment: () => void = (): void => {
       case 0: {
         mess = "评论";
         store.commit("CommentModule/addComment", {
-          time: new Date().getTime(),
-          comment: commentContent.value,
-          avatar: avatarSrc.value,
-          userName: userName.value,
+          content: {
+            type: 0,
+            time: new Date().getTime(),
+            comment: commentContent.value,
+            avatar: avatarSrc.value,
+            userName: userName.value,
+            replay: [],
+            showReplay: false,
+          },
         });
         break;
       }
       case 1: {
         mess = "回复";
+        store.commit("CommentModule/addReplayComment", {
+          index: commentAttrs.commentIndex,
+          content: {
+            type: 1,
+            time: new Date().getTime(),
+            comment: commentContent.value,
+            avatar: avatarSrc.value,
+            userName: userName.value,
+            repaly: [],
+            replaiedName:
+              commentAttrs.type === 1 ? commentAttrs.repliedName : "",
+          },
+        });
+        break;
       }
     }
     setTimeout(() => {

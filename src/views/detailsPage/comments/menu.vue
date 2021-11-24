@@ -5,6 +5,7 @@
       class="comment-menu"
       v-show="modelValue"
       v-outClose="hanldeToShow"
+      @contextmenu.stop
     >
       <dt>
         <svg-icon popper-class="icon-menu" icon-class="like"></svg-icon>点赞
@@ -56,19 +57,22 @@ const props = withDefaults(
   defineProps<{
     modelValue?: boolean; // 是否打开此组件
     isSelf?: boolean; // 用户是否正在操作自己的评论
-    commentIndex?: number; // 用户操作的该条评论的index索引值
-    commentName?: string; // 用户操作的该条评论的发表者
+    commentIndex: number; // 商品评论的索引值
+    // 回复属性(包括被回复的用户名、被回复的评论的索引值)
+    replayAttrs: {
+      type: number; // 用户是回复评论还是回复评论的评论
+      replaiedName: string; // 被回复的用户名
+      commentItemIndex: number; // 被回复的评论的索引值
+    };
   }>(),
   {
     modelValue: false,
     isSelf: false,
-    commentIndex: 0,
-    commentName: "",
   }
 );
 const emits = defineEmits<{
   (e: "update:modelValue", show: boolean): void;
-  (e: "replay", name: string, id: number): void; // 回复评论
+  (e: "replay", gener: number, type: number, name: string, id: number): void; // 回复评论
 }>();
 
 // 改变该菜单的显示状态
@@ -78,8 +82,16 @@ const hanldeToShow: (show: boolean) => void = (show: boolean): void => {
 
 // 回复评论
 const replay: () => void = (): void => {
-  emits("update:modelValue", false);
-  emits("replay", props.commentName, props.commentIndex);
+  emits("update:modelValue", false); // 关闭该菜单
+  emits(
+    "replay",
+    1,
+    props.replayAttrs.type,
+    props.replayAttrs.replaiedName,
+    props.replayAttrs.type === 1
+      ? props.commentIndex
+      : props.replayAttrs.commentItemIndex
+  );
 };
 </script>
 
