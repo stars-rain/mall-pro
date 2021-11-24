@@ -81,8 +81,12 @@ declare type CartItem = {
  * 评论内容接口
  */
 declare type Comments = {
+    type: number, // 确定是评论还是回复评论(0代表评论)
     time: number; // 评论发表的时间戳
     comment: string; // 评论内容
     avatar: string; // 头像路径
     userName: string; // 评论人的昵称
+    showReplay?: boolean; // 是否显示回复评论的内容
+    replaiedName?: string; // 被回复人的姓名
+    replay: Array<Omit<Comments, 'showReplay'> & { replaiedName: string }>; // 回复的数据
 }
