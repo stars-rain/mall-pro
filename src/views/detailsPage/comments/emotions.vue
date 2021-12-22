@@ -8,7 +8,7 @@
     <template #trigger>
       <svg-icon icon-class="smile" popper-class="icon-smile"></svg-icon>
     </template>
-    <scroll-bar :contentHei="360">
+    <scroll-bar :contentHei="365">
       <template v-for="item in emotionsDatas" :key="item.id">
         <img
           class="emotion"
