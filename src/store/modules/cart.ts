@@ -1,37 +1,13 @@
 import type { Module } from "vuex"
 import type { RootState, CartState } from "../interface"
-import { $axios } from '@/plugins/axios'
-
-/**
- * 对购物车操作请求的一个封装
- * @param url - 请求地址 
- * @param methods - 请求方法
- * @returns 返回一个接受请求参数、请求成功的回调函数这两个参数的函数(请求主体在这函数里面)
- */
-const $http: (url: string, methods: 'patch' | 'delete' | 'post') =>
-  <T>(params: T, callback: (...arg: any[]) => any) =>
-    Promise<boolean> = (url: string, methods: 'patch' | 'delete' | 'post'): <T>(params: T, callback: (...arg: any[]) => any) =>
-      Promise<boolean> => {
-    return <T>(params: T, callback: (...arg: any[]) => any): Promise<boolean> => {
-      return new Promise<boolean>((resolve, reject) => {
-        $axios([url, methods, params]).then(res => {
-          if (res.data.status === 'success') {
-            callback(); // 执行回调函数
-            resolve(true);
-          } else reject(false);
-        }).catch(error => {
-          console.log(error);
-          reject(false);
-        })
-      })
-    }
-  }
+import $http from "./$http";
 
 const UserModule: Module<CartState, RootState> = {
   namespaced: true,
   state: () => ({
     status: 1, // 用户操作购物车的一个状态，0代表购物车数据未发生改变
     cartList: [], // 购物车数据
+    isPayFor: false, // 用户是否在付款
   }),
   mutations: {
     // 用户的购物车状态是否发生改变
@@ -66,45 +42,25 @@ const UserModule: Module<CartState, RootState> = {
     $_clearCart(state): void {
       state.cartList.splice(0);
     },
+    // 改变用户付款状态
+    handleToPayFor(state, payload: { isPayFor: boolean }): void {
+      state.isPayFor = payload.isPayFor;
+    },
   },
   actions: {
     // 向后台发送购物车数据
     // eslint-disable-next-line no-empty-pattern
     async sendCartDatas({ }, payload: { account: string, id: number }): Promise<boolean> {
-      try {
-        const { data } = await $axios(['/addCart', 'post', {
-          account: payload.account,
-          id: payload.id,
-        }]);
-        if (data.status === 'success') return Promise.resolve(true);
-        else {
-          console.log(data.reason);
-          return Promise.reject(false);
-        }
-      }
-      catch (error) {
-        console.log(error);
-        return Promise.reject(false)
-      }
+      return await $http('/addCart', 'post')({
+        account: payload.account,
+        id: payload.id,
+      });
     },
     // 向后台请求购物车数据
     async getCartDatas({ state }, payload: { account: string }): Promise<boolean> {
-      try {
-        const { data } = await $axios(['/getCart', 'post', {
-          account: payload.account,
-        }]);
-        if (data.status === 'success') {
-          state.cartList = data.messages.cart;
-          return Promise.resolve(true);
-        } else {
-          console.log(data.reason);
-          return Promise.reject(false)
-        }
-      }
-      catch (error) {
-        console.log(error);
-        return Promise.reject(false)
-      }
+      return await $http('/getCart', 'post')({
+        account: payload.account,
+      }, (data) => {  state.cartList = data });
     },
     // 清空购物车
     clearCart({ commit }, payload: { account: string }): Promise<boolean> {
