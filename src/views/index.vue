@@ -88,16 +88,8 @@ export default defineComponent({
         !this.$store.state.UserModule.isLogin && account && account.length === 8
           ? true
           : false;
-      if (boo)
-        // 刷新页面时如果cookie中有用户账号的话则把此账号保存到vuex的UserModule中
-        this.$store.commit("UserModule/handleToAccount", { account });
       // 请求头部商品分类导航数据、头部商品轮播图数据、手机以及家电商品数据
       Promise.all([
-        boo
-          ? this.$store.dispatch("UserModule/getUserMessage", {
-              account: Base64.encode(account),
-            })
-          : null,
         this.getCommodityTypesDatas(),
         this.getCarouselDatas(),
         this.getPhoneDatas(),
@@ -105,7 +97,29 @@ export default defineComponent({
       ])
         .then((res: boolean[]) => {
           // 数据全部获取成功则关闭加载条
-          if (!res.includes(false)) (this.$refs.loadingBar as any).finish();
+          if (!res.includes(false)) {
+            if (boo) {
+              this.$store
+                .dispatch("UserModule/getUserMessage", {
+                  account: Base64.encode(account),
+                })
+                .then((res: boolean) => {
+                  if (res) {
+                    (this.$refs.loadingBar as any).finish();
+                    this.$store.commit("UserModule/handleToAccount", {
+                      account,
+                    });
+                  } else {
+                    (this.$refs.loadingBar as any).finish();
+                    Cookie.deleteCookie();
+                  }
+                })
+                .catch(() => {
+                  (this.$refs.loadingBar as any).finish();
+                  Cookie.deleteCookie();
+                });
+            } else (this.$refs.loadingBar as any).finish();
+          }
 
           this.timing = setTimeout(() => {
             /**
