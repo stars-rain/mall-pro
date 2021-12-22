@@ -5,8 +5,8 @@
         href="javascript:void(0)"
         :class="{
           'clear-cart': true,
-          'clear-cart__has': cartDiffLen,
-          'clear-cart__noHas': !cartDiffLen,
+          'clear-cart__has': cartDiffLen && !isPayFor,
+          'clear-cart__noHas': !cartDiffLen || (cartDiffLen && isPayFor),
         }"
         @click="clearTheCart"
         >清空购物车</a
@@ -15,8 +15,9 @@
       <a
         :class="{
           'cart-footer__delete': true,
-          'cart-footer__delete--checked': selectIds.length,
-          'cart-footer__delete--nochecked': !selectIds.length,
+          'cart-footer__delete--checked': selectIds.length && !isPayFor,
+          'cart-footer__delete--nochecked':
+            !selectIds.length || (selectIds.length && isPayFor),
         }"
         href="javascript:void(0)"
         @click="deleteCommodities(selectIds)"
@@ -38,9 +39,8 @@
           'payment-button__noHas': !cartLen || !selectIds.length,
         }"
         @click="payingFor"
-        :loading="loading"
       >
-        {{ loading ? "结算中..." : "现在结算" }}
+        {{ isPayFor ? "结算中..." : "现在结算" }}
       </button>
     </div>
   </div>
@@ -51,7 +51,6 @@ import {
   defineComponent,
   computed,
   defineProps,
-  ref,
   defineEmits,
 } from "@vue/runtime-core";
 
@@ -114,9 +113,13 @@ let totalMoney = computed((): number => {
   return total;
 });
 
+/**
+ * 用户是否在付款
+ */
+let isPayFor = computed(() => store.state.CartModule.isPayFor);
 // 清空购物车
 const clearTheCart: () => void = (): void => {
-  if (!cartDiffLen) return; // 如果购物车中无数据则直接返回
+  if (!cartDiffLen || isPayFor.value) return; // 如果购物车中无数据或者用户正在付款则直接返回
   emits("handlerPrompt", "是否清空购物车？"); // 改变对话框的提示
   emits("handlerDialog", true); // 打开对话框
 };
@@ -128,20 +131,17 @@ const clearTheCart: () => void = (): void => {
 const deleteCommodities: (ids: Array<number>) => void = (
   ids: Array<number>
 ): void => {
-  if (ids.length !== 0) {
+  if (ids.length !== 0 && !isPayFor.value) {
     emits("handlerPrompt", `是否删除已选中的${selectIdsLen.value}件商品`); // 改变对话框的提示
     emits("handlerDialog", true); // 打开对话框
   }
 };
 
-/**
- * 用户正在付款显示的加载动画
- */
-let loading = ref<boolean>(false);
 // 用户准备付款
 const payingFor: () => void = (): void => {
-  if (!cartLen.value || loading.value || !props.selectIds.length) return; // 如果购物车中无数据或者用户正在付款则直接返回
-  loading.value = true; // 开始加载动画
+  if (!cartLen.value || isPayFor.value || !props.selectIds.length) return; // 如果购物车中无数据或者用户正在付款则直接返回
+  // 改变用户付款状态，代表用户正在付款
+  store.commit("CartModule/handleToPayFor", { isPayFor: true });
   setTimeout(() => {
     store
       .dispatch("CartModule/deleteCart", {
@@ -150,14 +150,16 @@ const payingFor: () => void = (): void => {
       })
       .then((value: boolean): void => {
         if (value) {
-          emits('handlerSelectids', []); // 清空已勾选的商品id集合
+          emits("handlerSelectids", []); // 清空已勾选的商品id集合
           $message.success("付款成功，祝您购物愉快");
         } else $message.error("付款失败");
-        loading.value = false; // 关闭动画
+        // 付款操作完毕, 恢复原来付款状态
+        store.commit("CartModule/handleToPayFor", { isPayFor: false });
       })
       .catch(() => {
         $message.error("付款失败");
-        loading.value = false; // 关闭动画
+        // 付款操作完毕, 恢复原来付款状态
+        store.commit("CartModule/handleToPayFor", { isPayFor: false });
       });
   }, 3000);
 };

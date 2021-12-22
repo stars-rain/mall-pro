@@ -86,17 +86,17 @@ a {
     user-select        : none;
 }
 
-.submit() {
+.submit(@bkColor, @color, @hoverBkColor) {
     border-radius   : 3px;
-    background-color: extract(@colors, 3);
-    color           : extract(@colors, 4);
+    background-color: @bkColor;
+    color           : @color;
     transition      : background-color 0.25s ease-in;
     border          : 0;
     cursor          : pointer;
     .noselect();
 
     &:hover {
-        background-color: #f58134;
+        background-color: @hoverBkColor;
         transition      : background-color 0.35s ease-out;
     }
 }
@@ -106,4 +106,29 @@ a {
     border-radius   : 3px;
     box-shadow      : 0 1px 2px -2px rgb(0 0 0 / 8%), 0 3px 6px 0 rgb(0 0 0 / 6%),
         0 5px 12px 4px rgb(0 0 0 / 4%);
+}
+
+.fade(@time, @speed) {
+
+    &-enter-active,
+    &-leave-active {
+        transition: opacity @time @speed;
+    }
+
+    &-enter-from,
+    &-leave-to {
+        opacity: 0;
+    }
+}
+
+.dialog-prompt {
+    text-align: center;
+    margin    : 20px 0 30px 0;
+    font-size : 18px;
+
+    .icon-warn {
+        color       : extract(@colors, 3);
+        font-size   : 20px;
+        margin-right: 3px;
+    }
 }

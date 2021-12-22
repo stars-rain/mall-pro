@@ -12,9 +12,9 @@
             <div
               :class="{
                 checked: true,
-                disabledChecked: !cartDiffLen,
-                isChecked: showSeleAll && cartDiffLen,
-                noChecked: !showSeleAll && cartDiffLen,
+                disabledChecked: !cartDiffLen || (cartDiffLen && isPayFor),
+                isChecked: showSeleAll && cartDiffLen && !isPayFor,
+                noChecked: !showSeleAll && cartDiffLen && !isPayFor,
               }"
               @click="selectAll"
               v-if="item.id === 1"
@@ -51,8 +51,9 @@
               <div
                 :class="{
                   checked: true,
+                  disabledChecked: !currSelectIds.includes(item.id) && isPayFor,
                   isChecked: currSelectIds.includes(item.id),
-                  noChecked: !currSelectIds.includes(item.id),
+                  noChecked: !currSelectIds.includes(item.id) && !isPayFor,
                 }"
               >
                 <svg-icon
@@ -177,6 +178,10 @@ const emits = defineEmits<{
  */
 let cartDiffLen = computed(() => props.cartList.length);
 /**
+ * 用户是否在付款
+ */
+let isPayFor = computed(() => store.state.CartModule.isPayFor);
+/**
  * 是否购选全部商品
  */
 let showSeleAll = ref<boolean>(false);
@@ -209,7 +214,7 @@ watch(
  * 挑选全部商品
  */
 const selectAll: () => void = (): void => {
-  if (!cartDiffLen.value) return; // 如果购物车中无数据则直接返回
+  if (!cartDiffLen.value || isPayFor.value) return; // 如果购物车中无数据则或者用户正在付款直接返回
   showSeleAll.value = !showSeleAll.value;
   // 如果此时所有商品都被选中则取消选中
   if (currSelectIds.value.length === cartDiffLen.value) {
@@ -226,6 +231,7 @@ const selectAll: () => void = (): void => {
  * @param id - 该件商品的id值
  */
 const checkToItem: (id: number) => void = (id: number): void => {
+  if (isPayFor.value) return; // 如果用户正在付款则直接退出
   // 如果id集合中已经包括了此id值的话就移除否则加入
   if (currSelectIds.value.includes(id)) {
     currSelectIds.value.splice(
