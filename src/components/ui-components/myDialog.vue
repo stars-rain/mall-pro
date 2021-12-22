@@ -45,7 +45,6 @@
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
   ref,
   onBeforeUnmount,
   watch,
@@ -54,6 +53,7 @@ import {
 } from "@vue/runtime-core";
 import SvgIcon from "../svgIcon/index.vue";
 import dialogDrag from "@/directives/dialogDrag";
+import { getScrollHei } from "@/plugins/getScrollHei"
 
 export default defineComponent({
   name: "my-dialog",
@@ -129,10 +129,6 @@ export default defineComponent({
      */
     let showDialog = ref<boolean>(false);
     /**
-     * 滚动条的宽度
-     */
-    let scrollBarHei = ref<number>(0);
-    /**
      * 给遮罩层元素一个ref属性
      */
     let mask = ref<HTMLDivElement>();
@@ -173,7 +169,7 @@ export default defineComponent({
           // 开始渲染此组件
           showDialogBox.value = true;
           document.body.style.cssText += `overflow: hidden;padding-right: ${
-            scrollBarHei.value > 0 ? scrollBarHei.value : 17
+            getScrollHei()
           }px`;
           nextTick(() => {
             showDialog.value = true;
@@ -214,13 +210,6 @@ export default defineComponent({
       emit('moveFocus');
     }
 
-    onMounted(() => {
-      // 初始化滚动条的宽度
-      scrollBarHei.value =
-        // eslint-disable-next-line no-undef
-        globalThis.innerWidth -
-        (document.body.clientWidth || document.documentElement.clientWidth);
-    });
     onBeforeUnmount(() => {
       if (maskClosable.value) removeClickEvent();
     });
