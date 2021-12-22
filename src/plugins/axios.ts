@@ -3,6 +3,9 @@ import axios from "axios"
 import type { AxiosPromise, ResponseType } from "axios"
 
 type AxiosArg<T> = [string, ('get' | 'post' | 'put' | 'delete' | 'patch')?, T?, ResponseType?, string?];
+
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
 /**
  * 对axios进行再次封装
  * @param {string} args - 元组类型，请求体的各项参数，依次是请求地址、请求方法(可选默认为get)、发送的参数(可选)、数据相应的类型(可选默认为json)、默认接口地址前缀(可选默认为/api)
@@ -26,11 +29,14 @@ export function $axios<T>(args: AxiosArg<T>): AxiosPromise<any> {
                 data: params,
                 responseType,
                 baseURL,
+                cancelToken: url === '/getReplayComment' ? source.token : undefined,
             }); break;
         }
     }
     return $http
 }
+
+export { source }
 
 export default {
     install(app: ReturnType<typeof createApp>): void {
