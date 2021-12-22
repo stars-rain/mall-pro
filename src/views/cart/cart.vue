@@ -241,15 +241,4 @@ const handleToCommodity: (mess: string) => void = (mess: string): void => {
     color: #333;
   }
 }
-.dialog-prompt {
-  text-align: center;
-  margin: 20px 0 30px 0;
-  font-size: 18px;
-
-  .icon-warn {
-    color: extract(@colors, 3);
-    font-size: 20px;
-    margin-right: 3px;
-  }
-}
 </style>

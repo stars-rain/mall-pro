@@ -82,6 +82,9 @@ import {
   customRef,
   computed,
   reactive,
+  provide,
+  inject,
+  onBeforeUnmount,
 } from "@vue/runtime-core";
 import myDialog from "@/components/ui-components/myDialog.vue";
 import commentList from "./commentList.vue";
@@ -125,9 +128,6 @@ export default defineComponent({
       ).style.color = color;
     },
   },
-  mounted() {
-    this.$store.commit('CommentModule/hideReplay'); // 隐藏回复的评论
-  },
 });
 </script>
 
@@ -135,11 +135,16 @@ export default defineComponent({
 import { useMessage } from "naive-ui";
 import { useStore } from "@/store/index";
 import { useState } from "@/vuexHooks";
+import { Base64 } from "js-base64";
 
+/**
+ * 商品的唯一Id值
+ */
+const id: Ref<number> = inject("id") as Ref<number>;
 const store = useStore();
 const $message = useMessage();
-const { isLogin, avatarSrc, userName } = useState(
-  ["isLogin", "avatarSrc", "userName"],
+const { isLogin, avatarSrc, userName, account } = useState(
+  ["isLogin", "avatarSrc", "userName", "account"],
   "UserModule"
 );
 /**
@@ -220,34 +225,40 @@ const $_openDialog: (open: boolean) => void = (open: boolean): void => {
 
 let commentAttrs = reactive<{
   type: number; // 如果用户回复的话是回复评论还是回复评论的评论(0代表回复评论)
-  commentIndex: number; // 被回复评论的index索引值
+  fatherCommentId: number; // 被回复评论的所属一级评论的id值
+  commentId: number; // 被回复评论的id值
   repliedName: string; // 被回复人的用户名
 }>({
   type: 0,
-  commentIndex: 0,
+  fatherCommentId: -1,
+  commentId: -1,
   repliedName: "",
 });
 /**
  * 用户准备评论还是回复评论
  * @param type - 代表用户准备评论(0代表评论)
  * @param genres - 用户是回复评论还是回复评论的评论
- * @name - 被回复评论的用户名字
- * @param id - 被回复评论的索引值
+ * @param name - 被回复评论的用户名字
+ * @param id - 被回复评论的一级评论的id值
  */
 const isComment: (
   type: number,
   genres?: number,
   name?: string,
-  index?: number
+  fatherId?: number,
+  id?: number
 ) => void = (
   type: number,
   genres?: number,
   name?: string,
-  index?: number
+  fatherId?: number,
+  id?: number
 ): void => {
   if (typeof name === "string") commentAttrs.repliedName = name;
-  if (typeof index === "number") commentAttrs.commentIndex = index;
   if (typeof genres === "number") commentAttrs.type = genres;
+  if (typeof fatherId === "number")
+    commentAttrs.fatherCommentId = fatherId as number;
+  if (typeof id === "number") commentAttrs.commentId = id as number;
   status.value = type; // 改变状态码
   $_openDialog(true); // 打开对话框
 };
@@ -266,48 +277,118 @@ const submitComment: () => void = (): void => {
     $message.error("评论内容不能为空");
   } else {
     loading.value = true;
-    let mess: string = "";
     switch (status.value) {
       case 0: {
-        mess = "评论";
-        store.commit("CommentModule/addComment", {
-          content: {
-            type: 0,
-            time: new Date().getTime(),
-            comment: commentContent.value,
-            avatar: avatarSrc.value,
-            userName: userName.value,
-            replay: [],
-            showReplay: false,
-          },
-        });
+        store
+          .dispatch("CommentModule/addComment", {
+            staticData: {
+              avatar: avatarSrc.value,
+              userName: userName.value,
+            },
+            sendData: {
+              productId: id.value,
+              account: Base64.encode(account.value),
+              time: new Date().getTime(),
+              comment: commentContent.value,
+            },
+          })
+          .then((res: boolean): void => {
+            if (res) {
+              showDialog.value = false; // 关闭对话框
+              $message.success("评论成功");
+            } else {
+              $message.error("评论失败");
+            }
+            loading.value = false; // 关闭动画
+          })
+          .catch(() => {
+            loading.value = false; // 关闭动画
+            $message.error("评论失败");
+          });
         break;
       }
       case 1: {
-        mess = "回复";
-        store.commit("CommentModule/addReplayComment", {
-          index: commentAttrs.commentIndex,
-          content: {
-            type: 1,
-            time: new Date().getTime(),
-            comment: commentContent.value,
-            avatar: avatarSrc.value,
-            userName: userName.value,
-            repaly: [],
-            replaiedName:
-              commentAttrs.type === 1 ? commentAttrs.repliedName : "",
-          },
-        });
+        store
+          .dispatch("CommentModule/addReplayComment", {
+            staticData: {
+              avatar: avatarSrc.value,
+              userName: userName.value,
+              fatherCommentId: commentAttrs.fatherCommentId,
+            },
+            sendData: {
+              productId: id.value,
+              commentId: commentAttrs.commentId,
+              account: Base64.encode(account.value),
+              time: new Date().getTime(),
+              comment: commentContent.value,
+            },
+          })
+          .then((res: boolean): void => {
+            if (res) {
+              showDialog.value = false; // 关闭对话框
+              $message.success("回复成功");
+            } else {
+              $message.error("回复失败");
+            }
+            loading.value = false; // 关闭动画
+          })
+          .catch(() => {
+            loading.value = false; // 关闭动画
+            $message.error("回复失败");
+          });
         break;
       }
     }
-    setTimeout(() => {
-      $message.success(`${mess}成功`);
-      loading.value = false; // 关闭动画
-      showDialog.value = false; // 关闭对话框
-    }, 400);
   }
 };
+
+let timing = ref<number>(0);
+/**
+ * 用户点赞
+ * @param account - 当前登录用户的账号
+ * @param commentId - 评论的id值
+ * @param fatherCommentId - 一级评论的id值
+ */
+const handleToThumb: (
+  account: string,
+  commentId: number,
+  fatherCommentId: number
+) => void = ((): ((
+  account: string,
+  commentId: number,
+  fatherCommentId: number
+) => void) => {
+  let temp: boolean = false;
+  return (
+    account: string,
+    commentId: number,
+    fatherCommentId: number
+  ): void => {
+    if (temp) return;
+    temp = true;
+    store
+      .dispatch("CommentModule/handleToThumb", {
+        sendData: {
+          account,
+          commentId,
+          fatherCommentId,
+        },
+      })
+      .then((res: boolean) => {
+        if (!res) $message.error("点赞失败");
+        timing.value = setTimeout(() => (temp = false), 200);
+      })
+      .catch(() => {
+        $message.error("点赞失败");
+        timing.value = setTimeout(() => (temp = false), 200);
+      });
+  };
+})();
+provide("handleToThumb", handleToThumb);
+
+onBeforeUnmount(() => {
+  if (timing.value) clearTimeout(timing.value);
+});
 </script>
 
 <style lang="less" scoped>
@@ -342,6 +423,7 @@ const submitComment: () => void = (): void => {
 
     height: 30px;
     outline: 8px solid #e6e4e4a2;
+    border-radius: 0;
     cursor: text !important;
   }
 

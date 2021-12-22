@@ -142,7 +142,7 @@
               </div>
             </div>
             <n-message-provider>
-              <comment :title="'小米电视6 65″OLED'"></comment>
+              <comment :title="commodityDetailsDatas.name"></comment>
             </n-message-provider>
           </Skeleton>
         </div>
@@ -243,25 +243,43 @@ export default defineComponent({
       !this.$store.state.UserModule.isLogin && account && account.length === 8
         ? true
         : false;
-    if (boo)
-      // 刷新页面时如果cookie中有用户账号的话则把此账号保存到vuex的UserModule中
-      this.$store.commit("UserModule/handleToAccount", { account });
     this.$nextTick(() => {
       // 加载条开始滚动
       (this.$refs.loadingBar as any).start();
       // 请求头部商品分类导航数据、头部商品轮播图数据、手机以及家电商品数据
       Promise.all([
-        boo
-          ? this.$store.dispatch("UserModule/getUserMessage", {
-              account: Base64.encode(account),
-            })
-          : null,
         this.getCommodityTypesDatas(),
         this.getCommodityDetailsDatas({ id: +(this.$props as any).id }),
+        this.$store.dispatch("CommentModule/getComment", {
+          id: +(this.$props as any).id,
+          account: Base64.encode(account),
+        }),
       ])
         .then((res: boolean[]) => {
           // 数据全部获取成功则关闭加载条
-          if (!res.includes(false)) (this.$refs.loadingBar as any).finish();
+          if (!res.includes(false)) {
+            if (boo) {
+              this.$store
+                .dispatch("UserModule/getUserMessage", {
+                  account: Base64.encode(account),
+                })
+                .then((res: boolean) => {
+                  if (res) {
+                    (this.$refs.loadingBar as any).finish();
+                    this.$store.commit("UserModule/handleToAccount", {
+                      account,
+                    });
+                  } else {
+                    Cookie.deleteCookie();
+                    (this.$refs.loadingBar as any).finish();
+                  }
+                })
+                .catch(() => {
+                  Cookie.deleteCookie();
+                  (this.$refs.loadingBar as any).finish();
+                });
+            } else (this.$refs.loadingBar as any).finish();
+          }
         })
         .catch(() => this.$router.replace("/404")); // 获取失败则定位到404页面
     });
@@ -288,10 +306,10 @@ watch(
   (newValue: string): void => {
     currentId.value = +newValue;
   }
-)
+);
 
 // 提供该商品id给内部组件用
-provide('id', readonly(currentId));
+provide("id", readonly(currentId));
 
 /**
  * 是否加载骨架屏
@@ -304,12 +322,19 @@ let timing = ref<number>(0);
 onBeforeRouteUpdate((to): void => {
   // 开始加载骨架屏
   loading.value = true;
+  store.commit("CommentModule/$_clearComment"); // 清除缓存的评论数据
   // 更新数据
-  store
-    .dispatch("getCommodityDetailsDatas", { id: to.query.id })
-    .then((value: boolean) => {
-      if (value) timing.value = setTimeout(() => (loading.value = false), 400);
-    });
+  Promise.all([
+    store.dispatch("getCommodityDetailsDatas", { id: to.query.id }),
+    store.dispatch("CommentModule/getComment", {
+      id: to.query.id,
+      account: Base64.encode(store.state.UserModule.account),
+    }),
+  ]).then((res: boolean[]): void => {
+    if (!res.includes(false)) {
+      timing.value = setTimeout(() => (loading.value = false), 400);
+    }
+  });
 });
 /**
  * 用户是否登录
@@ -400,6 +425,7 @@ const addCart: () => void = (function (): () => void {
 })();
 
 onBeforeUnmount(() => {
+  store.commit("CommentModule/$_clearComment"); // 清除缓存的评论数据
   if (timing.value) clearTimeout(timing.value);
 });
 </script>
@@ -526,6 +552,6 @@ onBeforeUnmount(() => {
 .add-cart {
   margin: 30px 0 0 10px;
   padding: 12px 15px;
-  .submit();
+  .submit(extract(@colors, 3), extract(@colors, 4), #f58134);
 }
 </style>

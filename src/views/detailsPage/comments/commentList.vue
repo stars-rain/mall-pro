@@ -16,10 +16,10 @@
           'replay-item--nolast': index !== datasLen - 1 && item.type === 1,
           'comment-item': item.type === 0,
           'replay-item': item.type === 1,
+          [`six-replayComment-${commentId}`]:
+            datasLen > 5 && $attrs.class === 'replay-comments' && index === 5,
         }"
-        @contextmenu.stop="
-          openMenu(item.type, index, item.userName, $event)
-        "
+        @contextmenu.stop="openMenu(item.type, item.id, item.userName, $event)"
       >
         <img
           :class="{
@@ -30,59 +30,18 @@
           :src="item.avatar"
           alt="无法显示此图片"
         />
-        <div class="comment-attr">
-          <span
-            :class="{
-              'comment-attr--name': true,
-              'comment-name': item.type === 0,
-              'replay-name': item.type === 1,
-            }"
-            ><span>{{ item.userName }}</span>
-            <span v-if="item.replaiedName" class="replay-replay--comment"
-              >回复@{{ item.replaiedName }}</span
-            >：</span
-          >
-          <span
-            :class="{
-              'comment-attr--content': true,
-              'comment-content': item.type === 0,
-              'replay-content': item.type === 1,
-            }"
-            v-filterComment="item.comment"
-          ></span>
-          <div class="clearfix comment-attr--box">
-            <div class="comment-attr--left">
-              <span class="left-time" v-time="item.time"></span>
-              <span
-                class="left-replay"
-                @click="item.showReplay = !item.showReplay"
-                v-if="item.replay?.length"
-                >评论 ({{
-                  item.replay.length > 99 ? "99+" : item.replay.length
-                }})
-              </span>
-            </div>
-            <div class="comment-attr--right">
-              <svg-icon popper-class="icon-like" icon-class="like"></svg-icon>
-              <span class="right-spa">|</span>
-              <span
-                class="right-repDele"
-                @click="
-                  replay(
-                    1,
-                    item.type,
-                    item.userName,
-                    item.type === 1 ? commentIndex : index
-                  )
-                "
-                >回复</span
-              >
-            </div>
-          </div>
+        <comment-item
+          :comment="item"
+          :comment-id="item.id"
+          :father-comment-id="commentId"
+          @replay="replay"
+        ></comment-item>
+        <div v-if="item.loading" class="replay-comments__loading">
+          <spin />
         </div>
-        <template v-if="item.replay?.length">
+        <template v-if="item.replay?.length && !item.loading">
           <list-comment
-            :comment-index="index"
+            :comment-id="item.id"
             class="replay-comments"
             v-if="item.showReplay"
             :datas="item.replay"
@@ -90,12 +49,24 @@
           ></list-comment
         ></template>
       </li>
+      <template v-if="$attrs.class === 'replay-comments'">
+        <transition name="hdieComments-fade">
+          <li
+            class="hide-replay--comments"
+            v-show="showHideButton"
+            @click="hideReplayComment(commentId)"
+            @contextmenu.stop
+          >
+            收起评论
+            <svg-icon icon-class="arrowUp"></svg-icon></li></transition
+      ></template>
     </ul>
     <comment-menu
       ref="commentMenuRef"
       v-model="showMenu"
       :is-self="isSelf"
-      :comment-index="commentIndex"
+      :comment="currentCommentData"
+      :father-comment-id="commentId"
       :replay-attrs="replayAttrs"
       @replay="replay"
     ></comment-menu>
@@ -104,8 +75,7 @@
 
 <script lang="ts">
 import {
-  defineComponent,  
-  inject,
+  defineComponent,
   defineEmits,
   computed,
   ref,
@@ -113,38 +83,30 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
-  useAttrs,
   withDefaults,
   defineProps,
 } from "@vue/runtime-core";
-import time from "@/directives/time";
-import filterComment from "@/directives/filterComment";
 import commentMenu from "./menu.vue";
+import commentItem from "./commentItem.vue";
 
 export default defineComponent({
   name: "list-comment",
-  components: { commentMenu },
-  directives: {
-    time,
-    filterComment,
-  },
+  components: { commentMenu, commentItem },
 });
 </script>
 
 <script lang="ts" setup>
-import type { Ref } from "@vue/runtime-core";
 import { useStore } from "@/store/index";
 
 const store = useStore();
-const $attrs = useAttrs();
 const props = withDefaults(
   defineProps<{
     // eslint-disable-next-line no-undef
     datas: Array<Comments>; // 评论数据
-    commentIndex?: number; // 商品评论的索引值(一般用来记录二级评论的父级评论的索引值)
+    commentId?: number; // 商品评论的索引值(一般用来记录二级评论的父级评论的索引值)
   }>(),
   {
-    commentIndex: 0,
+    commentId: -1,
   }
 );
 let datasLen = computed(() => props.datas.length);
@@ -154,13 +116,10 @@ const emits = defineEmits<{
     type: number,
     genre?: number,
     name?: string,
-    index?: number
+    fatherId?: number,
+    id?: number
   ): void; // 告知父组件用户准备回复评论
 }>();
-/**
- * 当前商品的唯一id值
- */
-let id: Ref<number> = inject("id") as Ref<number>;
 /**
  * 当前登录账号的用户名
  */
@@ -186,6 +145,18 @@ let listX = reactive<{
   width: 0, // 该组件的宽度
 });
 /**
+ * 给listX对象的各属性值重新求值
+ */
+const getListX: () => void = (): void => {
+  const rect = commentList.value?.getBoundingClientRect();
+  listX.top =
+    (rect?.y as number) + document.documentElement.scrollTop ||
+    document.body.scrollTop;
+  // 获取该组件根元素距离浏览器顶部和左边界的距离
+  listX.left = rect?.x as number;
+  listX.width = rect?.width as number;
+};
+/**
  * 给该组件根元素一个ref属性便于访问
  */
 let commentList = ref<HTMLDivElement>();
@@ -198,23 +169,53 @@ let winHei = ref<number>(0);
  */
 const getWinHei: () => void = (): void => {
   winHei.value =
-    window.innerHeight ||
+    // eslint-disable-next-line no-undef
+    globalThis.innerHeight ||
     document.documentElement.clientHeight ||
     document.body.clientHeight;
 };
 
+/**
+ * 是否显示收起评论按钮
+ */
+let showHideButton = ref<boolean>(false);
+/**
+ * 隐藏回复评论
+ * @param id - 对应评论的id值
+ */
+const hideReplayComment: (id: number) => void = (id: number): void => {
+  // eslint-disable-next-line no-undef
+  const commentList: Array<Comments> = store.state.CommentModule.commentList;
+  commentList[commentList.findIndex((item) => item.id === id)].showReplay =
+    false;
+  store.commit("CommentModule/isShowReplaies", { id, show: false });
+};
+/**
+ * 观察回复评论的第六条评论(主要作用是用来显示还是关闭收起评论按钮)
+ */
+const observeReplayComment: () => void = (): void => {
+  const ele: HTMLLIElement = document.getElementsByClassName(
+    `six-replayComment-${props.commentId}`
+  )[0] as HTMLLIElement;
+  if (!ele) return;
+  const rect = ele.getBoundingClientRect();
+  if (rect.y <= winHei.value && !showHideButton.value)
+    // 如果元素距离浏览器顶部的距离小于或者等于窗口的高度则显示收起评论按钮
+    showHideButton.value = true;
+  else if (rect.y > winHei.value && showHideButton.value)
+    showHideButton.value = false;
+};
+
 onMounted(() => {
-  const rect = commentList.value?.getBoundingClientRect();
-  listX.top =
-    (rect?.y as number) + document.documentElement.scrollTop ||
-    document.body.scrollTop;
-  // 获取该组件根元素距离浏览器顶部和左边界的距离
-  listX.left = rect?.x as number;
-  listX.width = rect?.width as number;
+  getListX();
   getWinHei();
   window.addEventListener("resize", getWinHei);
+  document.addEventListener("scroll", observeReplayComment);
 });
-onBeforeUnmount(() => window.removeEventListener("resize", getWinHei));
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", getWinHei);
+  document.removeEventListener("scroll", observeReplayComment);
+});
 
 /**
  * 给评论操作菜单一个ref属性
@@ -226,16 +227,27 @@ let commentMenuRef = ref<InstanceType<typeof commentMenu>>();
 let replayAttrs = reactive<{
   type: number;
   replaiedName: string;
-  commentItemIndex: number;
+  commentId: number;
 }>({
   type: 0, // 是回复评论还是回复评论的评论(0代表回复评论)
-  replaiedName: '', // 被回复的用户名
-  commentItemIndex: 0, // 被回复的评论的索引值
+  replaiedName: "", // 被回复的用户名
+  commentId: 0, // 被回复的评论的id值
 });
+
+/**
+ * 当前用户操作的某条评论的具体数据
+ */
+let currentCommentData = computed(
+  () =>
+    props.datas[
+      props.datas.findIndex((item) => item.id === replayAttrs.commentId)
+    ]
+);
+
 /**
  * 打开评论操作菜单
  * @param type - 是回复评论还是回复评论的评论(0代表回复评论)
- * @param index - 该条评论的id值
+ * @param index - 该条评论的索引值值
  * @param name - 该登录用户的用户名
  */
 const openMenu: (
@@ -243,19 +255,15 @@ const openMenu: (
   index: number,
   name: string,
   e: MouseEvent
-) => void = (
-  type: number,
-  index: number,
-  name: string,
-  e: MouseEvent
-): void => {
+) => void = (type: number, id: number, name: string, e: MouseEvent): void => {
   e.preventDefault();
   replayAttrs.type = type;
-  replayAttrs.commentItemIndex = index;
+  replayAttrs.commentId = id;
   replayAttrs.replaiedName = name; // 发表该条评论的用户名
   if (name === userName.value) isSelf.value = true;
   else isSelf.value = false;
   if (!showMenu.value) showMenu.value = true; //打开评论操作菜单
+  getListX();
   const scrollY: number =
     document.documentElement.scrollTop || document.body.scrollTop; // 网页已滚动的距离
   const yTop = e.clientY; // 鼠标点击处距离浏览器顶部的距离
@@ -267,6 +275,10 @@ const openMenu: (
     const menuHei: number = (
       commentMenuRef.value?.$refs.commentMenu as HTMLDListElement
     ).offsetHeight;
+    // 评论操作菜单的宽度
+    const menuWid: number = (
+      commentMenuRef.value?.$refs.commentMenu as HTMLDListElement
+    ).offsetWidth;
     // 边界处理
     if (winHei.value - yTop < menuHei)
       y =
@@ -274,8 +286,8 @@ const openMenu: (
           ? scrollY + yTop - listX.top - menuHei
           : 0;
     else y = scrollY + yTop - listX.top > 0 ? scrollY + yTop - listX.top : 0;
-    if (listX.width + listX.left - xLeft < 136)
-      x = xLeft - listX.left > 0 ? xLeft - listX.left - 136 : 0;
+    if (listX.width + listX.left - xLeft < menuWid)
+      x = xLeft - listX.left > 0 ? xLeft - listX.left - menuWid : 0;
     else x = xLeft - listX.left > 0 ? xLeft - listX.left : 0;
     commentMenuRef.value?.handlerToDirection(x, y); // 改变评论操作菜单的位置
   });
@@ -285,40 +297,44 @@ const openMenu: (
  * @type - 是回复还是单纯的评论(1代表回复)
  * @genre - 是回复评论还是回复评论的评论
  * @param name - 被回复人的姓名
- * @param index - 被回复评论的索引值
+ * @param id - 被回复评论的一级评论的id值
  */
 const isComment: (
   type: number,
   genre?: number,
   name?: string,
-  index?: number
+  fatherId?: number,
+  id?: number
 ) => void = (
   type: number,
   genre?: number,
   name?: string,
-  index?: number
+  fatherId?: number,
+  id?: number
 ): void => {
-  emits("isComment", type, genre as number, name, index); // 告知父组件用户准备回复评论
+  emits("isComment", type, genre as number, name, fatherId, id); // 告知父组件用户准备回复评论
 };
 /**
  * 回复评论
  * @param type - 是回复还是单纯的评论(1代表回复)
  * @param genre - 是回复评论还是回复评论的评论
  * @param name - 被回复人的姓名
- * @param index - 被回复评论的索引值
+ * @param id - 被回复评论的一级评论的id值
  */
 const replay: (
   type: number,
   genre: number,
   name: string,
-  index: number
+  fatherId: number,
+  id: number
 ) => void = (
   type: number,
   genre: number,
   name: string,
-  index: number
+  fatherId: number,
+  id: number
 ): void => {
-  isComment(type, genre, name, index);
+  isComment(type, genre, name, fatherId, id);
 };
 </script>
 
@@ -333,7 +349,6 @@ const replay: (
   box-shadow: 0 1px 2px -2px rgb(0 0 0 / 8%), 0 3px 6px 0 rgb(0 0 0 / 6%),
     0 5px 12px 4px rgb(0 0 0 / 4%);
 }
-@opearColor: #c7c6c6;
 .comment {
   &-item {
     padding: 15px;
@@ -354,78 +369,18 @@ const replay: (
   &-avatar {
     .setWidHei(40px, 40px);
   }
-
-  &-attr {
-    float: left;
-    margin-left: 12px;
-    width: calc(100% - 70px);
-
-    &--box {
-      margin-top: 5px;
-    }
-
-    &--name {
-      cursor: pointer;
-    }
-
-    &--content {
-      word-wrap: break-word;
-    }
-
-    .attrs(@dir) {
-      float: @dir;
-      color: @opearColor;
-      font-size: 13px;
-    }
-    .hover() {
-      transition: color 0.2s;
-      &:hover {
-        color: #a09d9d;
-      }
-    }
-
-    &--left {
-      .attrs(left);
-
-      .left {
-        &-time {
-          margin-right: 10px;
-        }
-
-        &-replay {
-          cursor: pointer;
-          .hover();
-        }
-      }
-    }
-
-    &--right {
-      .attrs(right);
-
-      .icon-like {
-        cursor: pointer;
-        font-size: 16px;
-        .hover();
-      }
-      .right {
-        &-spa {
-          margin: 0 12px;
-          vertical-align: 1px;
-        }
-
-        &-repDele {
-          cursor: pointer;
-          .hover();
-        }
-      }
-    }
-  }
 }
 .replay {
   &-comments {
     margin: 60px 30px 0 60px;
     background-color: #fafafa;
     border-left: 2px solid #f6f6f6;
+
+    &__loading {
+      text-align: center;
+      margin: 60px 30px 0 60px;
+      padding: 20px;
+    }
   }
 
   &-item--nolast {
@@ -439,31 +394,21 @@ const replay: (
   &-item {
     padding: 12px;
   }
+}
+.hide-replay--comments {
+  position: sticky;
+  bottom: 0;
+  text-align: center;
+  background-color: rgba(241, 240, 240, 0.95);
+  color: #c7c6c6;
+  padding: 6px;
+  cursor: pointer;
 
-  &-replay--comment {
-    color: #1485f7;
-    margin-left: 8px;
-    font-size: 14px;
+  &:hover {
+    color: #bebdbd;
   }
 }
-.nameContent(@size, @number) {
-  font-size: @size;
-  color: extract(@colors, @number);
-}
-.comment {
-  &-name {
-    .nameContent(14px, 3);
-  }
-  &-content {
-    .nameContent(14px, 1);
-  }
-}
-.replay {
-  &-name {
-    .nameContent(13px, 3);
-  }
-  &-content {
-    .nameContent(13px, 1);
-  }
+.hdieComments-fade {
+  .fade(0.3s, ease-in);
 }
 </style>

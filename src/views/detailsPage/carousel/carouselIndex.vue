@@ -196,15 +196,7 @@ onBeforeUnmount(() => {
 
 <style lang="less" scoped>
 .carousel-fade {
-  &-enter-active,
-  &-leave-active {
-    transition: opacity 0.8s linear;
-  }
-
-  &-enter-from,
-  &-leave-to {
-    opacity: 0;
-  }
+  .fade(0.8s, linear);
 }
 .details-carousel {
   .setWidHei(v-bind(wid), v-bind(hei));

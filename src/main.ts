@@ -19,6 +19,7 @@ import $axios from "./plugins/axios"
 import $observer from "./plugins/observer"
 import $deepClone from "./plugins/deepClone"
 import collapseTransiton from "./components/functionalComponents/collapseTransition"
+import Spin from "./components/ui-components/spin.vue"
 
 const app: ReturnType<typeof createApp> = createApp(App);
 
@@ -42,6 +43,7 @@ const globalComponent: Map<string, any> = new Map<string, any>([
   ['svg-icon', SvgIcon], // svg图片组件
   ['loading-bar', loadingBar], // 加载条组件
   ['collapse-transition', collapseTransiton], // 折叠展开动画组件
+  ['spin', Spin], // 加载组件
 ]);
 for (const [k, v] of globalComponent.entries()) {
   app.component(k, v);

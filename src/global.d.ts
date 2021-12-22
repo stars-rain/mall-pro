@@ -81,12 +81,18 @@ declare type CartItem = {
  * 评论内容接口
  */
 declare type Comments = {
-    type: number, // 确定是评论还是回复评论(0代表评论)
+    type: number; // 确定是评论还是回复评论(0代表评论)
+    id: number; // 评论的唯一id值
     time: number; // 评论发表的时间戳
     comment: string; // 评论内容
     avatar: string; // 头像路径
     userName: string; // 评论人的昵称
+    thumb: number; // 评论点赞的数量
+    replayCount: number; // 评论属性
+    isLiked: boolean; // 该用户是否点赞了该条评论
+    loading?: boolean; // 是否显示加载动画
     showReplay?: boolean; // 是否显示回复评论的内容
-    replaiedName?: string; // 被回复人的姓名
-    replay: Array<Omit<Comments, 'showReplay'> & { replaiedName: string }>; // 回复的数据
+    replaiedName?: string; // 被回复人的用户名
+    replayStatus?: number; // 回复评论的状态是否发生改变, 0代表二级评论数量没改变, 1代表改变
+    replay: Array<Omit<Required<Comments>, 'showReplay' | 'loading' | 'replayStatus'>>; // 回复的数据
 }

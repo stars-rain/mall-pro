@@ -43,10 +43,11 @@ interface UserState {
 interface CartState {
     status: number; // 判断用户是否修改购物车数据
     cartList: Array<CartItem>;
+    isPayFor: boolean; // 用户是否正在付款
 }
 
 /**
- * 评论列表接口
+ * 评论接口
  */
 interface CommentState {
     commentList: Array<Comments>;

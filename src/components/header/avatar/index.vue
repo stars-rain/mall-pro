@@ -13,7 +13,6 @@
           ></n-avatar
         ></avatar-upload>
       </div>
-
       <span>在线</span>
       <transition name="fade">
         <ul
@@ -64,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, nextTick } from "@vue/runtime-core";
+import { defineComponent, ref, PropType } from "@vue/runtime-core";
 import myDialog from "@/components/ui-components/myDialog.vue";
 import avatarUpload from "./avatarUpload.vue";
 import outClose from "@/directives/vueClickClose";
