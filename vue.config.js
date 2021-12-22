@@ -20,7 +20,8 @@ module.exports = {
     proxy: {
       '/api': {
         //代理api
-        target: 'http://106.15.200.157:8080', // 代理接口(注意只要域名就够了)
+        // eslint-disable-next-line no-undef
+        target: process.env.VUE_APP_baseUrl, // 代理接口(注意只要域名就够了)
         changeOrigin: true, //是否跨域
         ws: true, // proxy websockets
         pathRewrite: {
