@@ -47,9 +47,9 @@ const fileEle = ref<HTMLInputElement>();
  */
 const handleToFiles: () => void = (): void => {
   const fileList: FileList = fileEle.value?.files as FileList;
-  const isLt2M = fileList[0].size / 1024 / 1024 < 3; // 判断文件的大小是否小于2MB
-  if (!isLt2M) {
-    // 如果大于2MB则报错直接返回
+  const is4M = fileList[0].size / 1024 / 1024 < 4; // 判断文件的大小是否小于4MB
+  if (!is4M) {
+    // 如果大于4MB则报错直接返回
     message.error("上传的头像文件大小不能大于4MB");
     return;
   }
@@ -63,8 +63,8 @@ const handleToFiles: () => void = (): void => {
     let form: FormData = new FormData();
     const img: string = e.target?.result as string;
     let imgBlob: Blob = dataURItoBlob(img);
-    // 如果图片大于1MB的话则压缩图片
-    if (fileList[0].size / 1024 / 1024 > 0.3) {
+    // 如果图片大于0.5MB的话则压缩图片
+    if (fileList[0].size / 1024 / 1024 > 0.5) {
       let value: Blob = await pictureCompression(img, { quality: 0.25 });
       imgBlob = value;
     }
