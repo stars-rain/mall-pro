@@ -39,12 +39,13 @@ const props = withDefaults(
     show?: boolean; // 是否显示切换箭头
     id?: number; // 当前所显示轮播图片的id值
     time?: number; // 恢复轮播的时间
-    imgheight: string | number; // 轮播图的高度
+    imgheight?: string | number; // 轮播图的高度
   }>(),
   {
     show: false,
     id: 0,
     time: 4500,
+    imgheight: "460px",
   }
 );
 
