@@ -80,7 +80,7 @@ import { useStore } from "@/store/index";
 import { useMessage } from "naive-ui";
 import myDialog from "@/components/ui-components/myDialog.vue";
 import { Base64 } from "js-base64";
-import { source } from "@/plugins/axios"
+import { source, refreshAxios } from "@/plugins/axios"
 
 const store = useStore();
 const $message = useMessage();
@@ -196,6 +196,7 @@ const deleteComment: (type: number, comment: Comments) => void = (
   if (comment.loading) {
     // 取消请求二级评论的请求
     source.cancel();
+    refreshAxios();
     comment.loading = false;
   }
   showDialog.value = false; // 关闭对话框
