@@ -17,10 +17,16 @@ const $http: (url: string, methods: 'patch' | 'delete' | 'post' | 'get') =>
          if (res.data.status === 'success') {
            if (typeof callback !== 'undefined') {
               switch(url) {
-                case '/getCart': callback(res.data.messages.cart);break;
-                case '/addComment': case '/addReplayComment': callback(res.data.messages.id);break;
-                case '/getComment': case '/getReplayComment': callback(res.data.messages.comments);break;
-                default: callback();
+                case '/clearCart':
+                case '/deleteCart':
+                case '/updateCount_order':
+                case '/updateCount_noorder':
+                case '/payment':
+                case '/isLikeComment':
+                case '/deleteComment':
+                case '/deleteOrder':
+                  callback();break;
+                default: callback(res.data.messages);
               }
             } // 执行回调函数
            resolve(true);
