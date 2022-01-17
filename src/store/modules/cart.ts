@@ -51,45 +51,46 @@ const UserModule: Module<CartState, RootState> = {
     // 向后台发送购物车数据
     // eslint-disable-next-line no-empty-pattern
     async sendCartDatas({ }, payload: { account: string, id: number }): Promise<boolean> {
-      return await $http('/addCart', 'post')({
-        account: payload.account,
-        id: payload.id,
-      });
+      return await $http('/addCart', 'post')(payload);
     },
     // 向后台请求购物车数据
     async getCartDatas({ state }, payload: { account: string }): Promise<boolean> {
-      return await $http('/getCart', 'post')({
-        account: payload.account,
-      }, (data) => {  state.cartList = data });
+      return await $http('/getCart', 'post')(
+        payload,
+        ({ cart }) => { state.cartList = cart },
+        );
     },
     // 清空购物车
     clearCart({ commit }, payload: { account: string }): Promise<boolean> {
-      return $http('/clearCart', 'delete')({
-        account: payload.account,
-      }, () => { commit('$_clearCart') });
+      return $http('/clearCart', 'delete')(payload, () => { commit('$_clearCart') });
     },
     // 删除购物车中的某件商品
     deleteCart({ commit }, payload: { account: string, ids: Array<number> }): Promise<boolean> {
-      return $http('/deleteCart', 'post')({
-        account: payload.account,
-        ids: payload.ids,
-      }, () => { commit('$_deleteCart', { ids: payload.ids }) });
+      return $http('/deleteCart', 'post')(
+        payload,
+        () => { commit('$_deleteCart', { ids: payload.ids }) },
+        );
     },
     // 购物车中的某件商品数量+1或者-1
     handleToCount({ commit }, payload: { account: string, id: number, count: number }): Promise<boolean> {
-      return $http('/updateCount_order', 'patch')({
-        account: payload.account,
-        id: payload.id,
-        count: payload.count,
-      }, () => { commit('$_handleToCount', { id: payload.id, count: payload.count }) });
+      return $http('/updateCount_order', 'patch')(
+        payload,
+        () => { commit('$_handleToCount', { id: payload.id, count: payload.count }) },
+        );
     },
     // 对购物车中的某件商品数量进行直接赋值
     changeToCount({ commit }, payload: { account: string, id: number, count: number }): Promise<boolean> {
-      return $http('/updateCount_noorder', 'patch')({
-        account: payload.account,
-        id: payload.id,
-        count: payload.count,
-      }, () => { commit('$_changeToCount', { id: payload.id, count: payload.count }) });
+      return $http('/updateCount_noorder', 'patch')(
+        payload,
+        () => { commit('$_changeToCount', { id: payload.id, count: payload.count }) },
+        );
+    },
+    // 用户开始付款并且生成对应订单
+    payingFor({ commit }, payload: { account: string, ids: Array<number> }): Promise<boolean> {
+      return $http('/payment', 'post')(
+        payload,
+        () => { commit('$_deleteCart', { ids: payload.ids }) },
+        );
     },
   },
 }

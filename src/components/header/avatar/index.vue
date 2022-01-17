@@ -165,7 +165,12 @@ const quitLogin: () => void = (): void => {
           handleToTelephone(), // 清除保存的用户的手机号码
           handleToAddress(), // 清除保存的用户的地址
           handleToAccount(), // 清除保存的用户账号
-        ]).then(() => message.success("退出成功"));
+        ]).then(() => {
+          // 退出登录时改变登录状态
+          if (sessionStorage.getItem("isDetailsPage"))
+            store.commit("handleToCollectState");
+          message.success("退出成功");
+        });
       } else {
         message.error("退出失败");
         console.log(res.data.reason);

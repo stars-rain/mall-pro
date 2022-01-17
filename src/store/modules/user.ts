@@ -1,7 +1,7 @@
 import type { Module } from "vuex"
 import type { RootState, UserState } from "../interface"
-import { $axios } from '@/plugins/axios'
 import { Base64 } from "js-base64"
+import $http from "./$http"
 
 const UserModule: Module<UserState, RootState> = {
   namespaced: true,
@@ -57,24 +57,15 @@ const UserModule: Module<UserState, RootState> = {
   },
   actions: {
     async getUserMessage({ state, commit }, payload: { account: string }): Promise<boolean> {
-      try {
-        const { data } = await $axios([
-          '/refresh',
-          'post',
-          { params: Base64.encode(JSON.stringify({ account: payload.account })) },
-        ]);
-        if (data.status === 'success') {
-          const usr = JSON.parse(Base64.decode(data.messages.user));
+      return await $http('/refresh', 'post')(
+        { params: Base64.encode(JSON.stringify({ account: payload.account })) },
+        ({ user }) => {
+          const usr = JSON.parse(Base64.decode(user));
           Object.keys(state).forEach((key: string) => usr[key]?.length ? (state as any)[key] = usr[key] : null);
           // 此时用户已是登录状态
           commit('handleToLogin', { isLogin: true });
-          return Promise.resolve(true);
-        }
-        return Promise.reject(false);
-      } catch (error) {
-        console.log(error);
-        return Promise.reject(false)
-      }
+        },
+      )
     },
   },
 }

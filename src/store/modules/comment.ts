@@ -79,7 +79,7 @@ const CommentModule: Module<CommentState, RootState> = {
           productId: payload.id,
           account: payload.account,
         },
-        (comments) => {
+        ({ comments }) => {
           comments.forEach((item: any) => {
           state.commentList.push(Object.assign(item, {
             loading: false,
@@ -96,7 +96,7 @@ const CommentModule: Module<CommentState, RootState> = {
           id: payload.id,
           account: payload.account,
         },
-        (comments) => {
+        ({ comments }) => {
           const comment: Comments = state.commentList[state.commentList.findIndex(item => item.id === payload.id)];
           comments.forEach((item: any) => {
           comment.replay.push(item)
@@ -113,7 +113,7 @@ const CommentModule: Module<CommentState, RootState> = {
     ): Promise<boolean> {
       return await $http('/addComment', 'patch')(
         payload.sendData,
-        (id) => {
+        ({ id }) => {
           Reflect.deleteProperty(payload.sendData, "productId");
           Reflect.deleteProperty(payload.sendData, "account");
           setTimeout(() => {
@@ -143,7 +143,7 @@ const CommentModule: Module<CommentState, RootState> = {
     ): Promise<boolean> {
       return await $http('/addReplayComment', 'patch')(
         payload.sendData,
-        (id: number) => {
+        ({ id }) => {
           /**
            * 一级评论
            */

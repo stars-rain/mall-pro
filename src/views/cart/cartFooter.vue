@@ -35,8 +35,8 @@
       <button
         :class="{
           'payment-button': true,
-          'payment-button__has': cartLen && selectIds.length,
-          'payment-button__noHas': !cartLen || !selectIds.length,
+          'payment-button__has': cartLen && selectIds.length && !isPayFor,
+          'payment-button__noHas': !cartLen || !selectIds.length || isPayFor,
         }"
         @click="payingFor"
       >
@@ -119,7 +119,7 @@ let totalMoney = computed((): number => {
 let isPayFor = computed(() => store.state.CartModule.isPayFor);
 // 清空购物车
 const clearTheCart: () => void = (): void => {
-  if (!cartDiffLen || isPayFor.value) return; // 如果购物车中无数据或者用户正在付款则直接返回
+  if (!cartDiffLen.value || isPayFor.value) return; // 如果购物车中无数据或者用户正在付款则直接返回
   emits("handlerPrompt", "是否清空购物车？"); // 改变对话框的提示
   emits("handlerDialog", true); // 打开对话框
 };
@@ -144,7 +144,7 @@ const payingFor: () => void = (): void => {
   store.commit("CartModule/handleToPayFor", { isPayFor: true });
   setTimeout(() => {
     store
-      .dispatch("CartModule/deleteCart", {
+      .dispatch("CartModule/payingFor", {
         account: Base64.encode(store.state.UserModule.account),
         ids: props.selectIds,
       })
@@ -255,11 +255,11 @@ const payingFor: () => void = (): void => {
     margin-right: 15px;
 
     &--checked {
-      color: extract(@colors, 3);
+      color: #636060;
       transition: color 0.2s;
 
       &:hover {
-        color: #f57926;
+        color: extract(@colors, 3);
       }
     }
 

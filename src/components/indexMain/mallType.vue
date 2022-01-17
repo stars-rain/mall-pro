@@ -132,14 +132,6 @@ export default defineComponent({
 .no-margin-right {
   margin-right: 0 !important;
 }
-.imgHover {
-  transition: all 0.2s linear;
-
-  &:hover {
-    box-shadow: 0 15px 30px rgb(0 0 0 / 10%);
-    transform: translate3d(0, -2px, 0);
-  }
-}
 
 .phone-left {
   float: left;
@@ -199,24 +191,15 @@ export default defineComponent({
       }
     }
 
-    .same (@size, @color) {
-      font-size: @size;
-      text-align: center;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-      color: @color;
-    }
-
     &__name {
-      .same(14px, extract(@colors, 1));
+      .aHover(14px, extract(@colors, 1));
       height: 18px;
       margin: 0;
       font-weight: 400;
     }
 
     &__desc {
-      .same(12px, #b0b0b0);
+      .aHover(12px, #b0b0b0);
       height: 16px;
       margin: 8px 0;
     }

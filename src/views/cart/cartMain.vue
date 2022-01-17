@@ -12,9 +12,9 @@
             <div
               :class="{
                 checked: true,
-                disabledChecked: !cartDiffLen || (cartDiffLen && isPayFor),
-                isChecked: showSeleAll && cartDiffLen && !isPayFor,
-                noChecked: !showSeleAll && cartDiffLen && !isPayFor,
+                disabledChecked: !cartDiffLen || (!showSeleAll && isPayFor),
+                isChecked: showSeleAll && currSelectIds.length,
+                noChecked: !showSeleAll && !isPayFor && cartDiffLen,
               }"
               @click="selectAll"
               v-if="item.id === 1"
@@ -254,6 +254,11 @@ const checkToItem: (id: number) => void = (id: number): void => {
 const countBlur: (id: number, count: number, e: FocusEvent) => void = (() => {
   let throttle = false;
   return (id: number, count: number, e: FocusEvent): void => {
+    if (isPayFor.value) {
+      $message.error("正在付款，请稍后");
+      (e.target as HTMLInputElement).value = count + ""; // 还原到原来的数量
+      return;
+    }
     // 数量输入框的值
     const value: string = (e.target as HTMLInputElement).value;
     if (/[^0-9]/g.test(value)) {
@@ -292,37 +297,41 @@ const handleToTheCount: (id: number, count: number, oriCount?: number) => void =
   (() => {
     let throttle = false;
     return (id: number, count: number, oriCount?: number): void => {
-      if (throttle) {
-        $message.error("操作太频繁");
-        return;
-      }
-      throttle = true;
-      if (oriCount === 1 && count === -1) {
-        // 如果用户所购商品已经是0还减少的话则抛出操作错误提示
-        $message.error("商品数量不能为0");
-        throttle = false;
-        return;
-      }
-      handleToCount({
-        account: Base64.encode(store.state.UserModule.account),
-        id,
-        count,
-      })
-        .then((value: boolean): void => {
-          if (value) throttle = false;
-        })
-        .catch(() => {
-          $message.error("出错了");
+      if (!isPayFor.value) {
+        if (throttle) {
+          $message.error("操作太频繁");
+          return;
+        }
+        throttle = true;
+        if (oriCount === 1 && count === -1) {
+          // 如果用户所购商品已经是0还减少的话则抛出操作错误提示
+          $message.error("商品数量不能为0");
           throttle = false;
-        });
+          return;
+        }
+        handleToCount({
+          account: Base64.encode(store.state.UserModule.account),
+          id,
+          count,
+        })
+          .then((value: boolean): void => {
+            if (value) throttle = false;
+          })
+          .catch(() => {
+            $message.error("出错了");
+            throttle = false;
+          });
+      }
     };
   })();
 
 // 用户删除购物车中的某件商品
 const deleteCommodity: (id: number) => void = (id: number): void => {
-  emits("handlerDeleId", id); // 通知父组件用户准备删除该件商品
-  emits("handlerPrompt", "确认将该件商品从购物车中移除？"); // 改变对话框的提示
-  emits("handlerDialog", true); // 打开对话框
+  if (!isPayFor.value) {
+    emits("handlerDeleId", id); // 通知父组件用户准备删除该件商品
+    emits("handlerPrompt", "确认将该件商品从购物车中移除？"); // 改变对话框的提示
+    emits("handlerDialog", true); // 打开对话框
+  }
 };
 </script>
 
@@ -342,32 +351,9 @@ const deleteCommodity: (id: number) => void = (id: number): void => {
   }
 }
 
-.isChecked {
-  background-color: extract(@colors, 3);
-  color: extract(@colors, 4);
-  border: 1px solid transparent;
-  cursor: pointer;
-}
-
-.checked() {
-  border: 1px solid #e0e0e0;
-  color: #6e6b6b;
-}
-
 .disabledChecked {
   .checked();
   cursor: not-allowed;
-}
-
-.noChecked {
-  cursor: pointer;
-  .checked();
-
-  &:hover {
-    .icon-checked {
-      display: block !important;
-    }
-  }
 }
 
 .cart {
@@ -416,7 +402,7 @@ const deleteCommodity: (id: number) => void = (id: number): void => {
           font-size: 14px;
 
           li {
-            padding: 20px 0;
+            height: 60px;
             display: flex;
             align-items: center;
             float: left;
