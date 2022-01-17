@@ -54,12 +54,39 @@ interface CommentState {
 }
 
 /**
+ * 我的收藏vuex的state数据接口
+ */
+interface CollectState {
+    collectDatas: Array<Collect>;
+    collectLen: number;
+    needPage: number; // 当前页面所需要显示的页码数
+}
+
+/**
+ * 历史订单的vuex的state数据接口
+ */
+
+interface OrderState {
+    orderDatas: Array<Order>;
+}
+
+/**
  * vuex各个state属性的集成
  */
 interface AllState extends RootState {
     UserModule: UserState;
     CartModule: CartState;
     CommentModule: CommentState;
+    CollectModule: CollectState;
+    OrderModule: OrderState;
 }
 
-export { RootState, UserState, CartState, CommentState, AllState }
+export {
+    RootState,
+    UserState,
+    CartState,
+    CommentState,
+    AllState,
+    CollectState,
+    OrderState,
+}
