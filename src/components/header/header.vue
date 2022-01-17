@@ -32,7 +32,7 @@
               class="cart-empty"
               style="font-size: 16px; color: rgb(252, 5, 5)"
             >
-              获取失败
+              加载失败
             </div>
             <div v-if="loading" class="cart-empty">
               <n-spin stroke="#ff6700"></n-spin>
@@ -48,6 +48,17 @@
               ></cart-items
             ></n-message-provider></div
         ></collapse-transition>
+      </div>
+      <div class="header-logreg">
+        <a
+          class="header-nav header-collect"
+          href="javascript:void(0)"
+          @click="toMyCollect"
+          >我的收藏</a
+        >
+        <a class="header-nav" href="javascript:void(0)" @click="toMyOrder"
+          >历史订单</a
+        >
       </div>
       <div class="header-logreg" v-if="!isLogin">
         <router-link
@@ -155,8 +166,23 @@ export default defineComponent({
 
 <script lang="ts" setup>
 import { useState } from "@/vuexHooks";
+import { useRouter } from "vue-router";
 
+const $router = useRouter();
 const { isLogin } = useState(["isLogin"], "UserModule");
+/**
+ * 跳转至我的收藏页面
+ */
+const toMyCollect: () => void = (): void => {
+  $router.push({ path: "/collect/index", query: { page: 1 } }); // 跳转至我的收藏页面
+};
+
+/**
+ * 跳转至订单页面
+ */
+const toMyOrder: () => void = (): void => {
+  $router.push({ name: "order" });
+};
 </script>
 
 <style lang="less" scoped>
@@ -189,7 +215,7 @@ const { isLogin } = useState(["isLogin"], "UserModule");
   }
 
   &-logreg {
-    margin-right: 20px;
+    margin-right: 25px;
 
     .cartlogreg();
 
@@ -197,6 +223,10 @@ const { isLogin } = useState(["isLogin"], "UserModule");
       color: extract(@colors, 2);
       margin: 0 0.3em;
     }
+  }
+
+  &-collect {
+    margin-right: 10px;
   }
 
   &-cart {
