@@ -62,31 +62,36 @@ export default defineComponent({
             if (value) {
               this.$store.commit("CartModule/handleToStatus"); // 初始化用户购物车状态未发生改变
               (this.$refs.loadingBar as any).finish();
-            }
+            } else this.$router.replace("/404");
           })
           .catch(() => this.$router.replace("/404")); // 获取失败则定位到404页面
       } else if (this.$store.state.CartModule.status === 1 && !this.isLogin) {
         const account: string = Cookie.getCookie().account;
         const boo: boolean = account && account.length === 8 ? true : false;
         if (boo) {
-          // 刷新页面时如果cookie中有用户账号的话则把此账号保存到vuex的UserModule中
-          this.$store.commit("UserModule/handleToAccount", { account });
-          Promise.all([
-            this.$store.dispatch("UserModule/getUserMessage", {
+          this.$store
+            .dispatch("CartModule/getCartDatas", {
               account: Base64.encode(account),
-            }),
-            this.$store.dispatch("CartModule/getCartDatas", {
-              account: Base64.encode(account),
-            }),
-          ])
-            .then((res: boolean[]): void => {
-              // 数据全部获取成功则关闭加载条
-              if (!res.includes(false)) {
+            })
+            .then((res: boolean) => {
+              if (res) {
                 this.$store.commit("CartModule/handleToStatus"); // 初始化用户购物车状态未发生改变
                 (this.$refs.loadingBar as any).finish();
-              }
-            })
-            .catch(() => this.$router.replace("/404"));
+                this.$store
+                  .dispatch("UserModule/getUserMessage", {
+                    account: Base64.encode(account),
+                  })
+                  .then((res: boolean) => {
+                    if (res)
+                      // 刷新页面时如果cookie中有用户账号的话则把此账号保存到vuex的UserModule中
+                      this.$store.commit("UserModule/handleToAccount", {
+                        account,
+                      });
+                    else Cookie.deleteCookie();
+                  })
+                  .catch(() => Cookie.deleteCookie());
+              } else this.$router.replace("/404");
+            });
         } else setTimeout(() => (this.$refs.loadingBar as any).finish(), 100);
       } else setTimeout(() => (this.$refs.loadingBar as any).finish(), 100);
     });
