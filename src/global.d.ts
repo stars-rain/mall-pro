@@ -60,7 +60,11 @@ declare type User = {
  * 商品详情的数据接口
  */
 declare type CommodityDetails = Commodity &
-{ saleDesc: string;imgDetails: Array<{ id: number;src: string; }> };
+{
+    saleDesc: string;
+    imgDetails: Array<{ id: number; src: string; }>;
+    isLove: boolean;
+};
 
 /**
  * 购物车中某件商品的接口
@@ -74,7 +78,6 @@ declare type CartItem = {
     price: number; // 商品单价
     count: number; // 商品数量
     cost: number; // 商品总价
-    account?: string;
 }
 
 /**
@@ -95,4 +98,21 @@ declare type Comments = {
     replaiedName?: string; // 被回复人的用户名
     replayStatus?: number; // 回复评论的状态是否发生改变, 0代表二级评论数量没改变, 1代表改变
     replay: Array<Omit<Required<Comments>, 'showReplay' | 'loading' | 'replayStatus'>>; // 回复的数据
+}
+
+/**
+ * 收藏数据接口
+ */
+declare type Collect = Omit<Commodity, 'titleId'> & { title: string;productId: number; };
+
+/**
+ * 订单属性接口
+ */
+declare type Order = {
+    id: number; // 订单的id值
+    orderId: string; // 订单编号
+    time: string; // 订单生成时间
+    allCount: number; // 所有商品数的总和
+    allCost: number; // 所有商品的价格总和
+    commodities: Array<Omit<CartItem, "id">>;
 }
