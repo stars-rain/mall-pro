@@ -9,10 +9,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '404',
     },
-    beforeEnter(to) {
-      // 进入该路由前改变文档标题
-      document.title = to.meta.title;
-    },
   },
   {
     /* 首页 */
@@ -21,10 +17,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/index.vue'),
     meta: {
       title: '小米商城',
-    },
-    beforeEnter(to) {
-      // 进入该路由前改变文档标题
-      document.title = to.meta.title;
     },
   },
   // 商品详情页
@@ -36,25 +28,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '商品详情',
     },
-    beforeEnter(to) {
-      // 进入该路由前改变文档标题
-      document.title = to.meta.title;
-    },
   },
   {
     name: 'reglog',
     path: '/reglog/:title',
     component: () => import('@/views/login/index.vue'),
     props: (route) => ({ title: route.params.title }),
-    beforeEnter(to) {
-      // 判断用户是进行注册还是登录以便改变文档的title
-      switch (to.params.title) {
-        case 'login': to.meta.title = '登录'; break;
-        case 'register': to.meta.title = '注册'; break;
-      }
-      // 进入该路由前改变文档标题
-      document.title = to.meta.title;
-    },
   },
   {
     // 购物车页面
@@ -64,9 +43,31 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '购物车'
     },
-    beforeEnter(to) {
-      // 进入该路由前改变文档标题
-      document.title = to.meta.title;
+  },
+  {
+    // 我的收藏页面
+    name: 'collect',
+    path: '/collect',
+    component: () => import('@/views/collect/index.vue'),
+    meta: {
+      title: '我的收藏'
+    },
+    children: [
+      {
+        name: 'collectPage',
+        path: 'index',
+        component: () => import('@/views/collect/content.vue'),
+        props: (route) => ({ page: route.query.page }),
+      },
+    ],
+  },
+  {
+    // 订单页面
+    name: 'order',
+    path: '/order',
+    component: () => import('@/views/order/index.vue'),
+    meta: {
+      title: '历史订单'
     },
   },
 ]
@@ -75,13 +76,20 @@ const router = createRouter({
   // linkExactActiveClass: 'active',
   history: createWebHistory(process.env.BASE_URL),
   routes,
-  scrollBehavior(to, from, savedPosition) {
+  /* scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
     } else {
       return { top: 0 }
     }
-  },
+  }, */
+})
+
+router.beforeEach((to): void => {
+  if (to.params.title === 'login') to.meta.title = '登录';
+  else if (to.params.title === 'register') to.meta.title = '注册'
+  // 进入该路由前改变文档标题
+  document.title = to.meta.title;
 })
 
 export default router
