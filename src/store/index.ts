@@ -4,6 +4,8 @@ import { $axios } from '@/plugins/axios'
 import UserModule from "./modules/user"
 import CartModule from "./modules/cart"
 import CommentModule from "./modules/comment"
+import CollectModule from './modules/collects'
+import OrderModule from "./modules/order"
 import type { RootState, AllState } from './interface'
 
 /* 定义类型化的 InjectionKey */
@@ -47,6 +49,9 @@ export default createStore<RootState>({
     commodityDetailsDatas: {} as CommodityDetails,
   }),
   mutations: {
+    handleToCollectState(state): void {
+      if (state.commodityDetailsDatas.isLove) state.commodityDetailsDatas.isLove = false;
+    },
   },
   actions: {
     /**
@@ -80,14 +85,16 @@ export default createStore<RootState>({
      * 请求商品详情数据
      * @param state - 根部state属性
      */
-    getCommodityDetailsDatas({ state }, payload: { id: number }): Promise<boolean> {
-      return $http('/detailsPage', 'get', { id: payload.id })(state, 'commodityDetailsDatas');
+    getCommodityDetailsDatas({ state }, payload: { id: number, account: string }): Promise<boolean> {
+      return $http('/detailsPage', 'get', payload)(state, 'commodityDetailsDatas');
     },
   },
   modules: {
     UserModule,
     CartModule,
     CommentModule,
+    CollectModule,
+    OrderModule,
   },
 })
 
