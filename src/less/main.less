@@ -1,6 +1,7 @@
 @width    : 1226px;
 @arrowleft: 25px; // 轮播图左右切换箭头的左右外边距
 @menuBgk  : #e4e4e4; // 菜单按钮背景
+@disableText: #b1adad;
 @colors   : #333,
 #424242,
 #ff6700,
@@ -21,6 +22,15 @@ rgb(220, 220, 224);
 .container {
     width : @width;
     margin: 0 auto;
+}
+
+.imgHover {
+    transition: all 0.2s linear;
+
+    &:hover {
+        box-shadow: 0 15px 30px rgb(0 0 0 / 10%);
+        transform : translate3d(0, -2px, 0);
+    }
 }
 
 .clearfix {
@@ -130,5 +140,38 @@ a {
         color       : extract(@colors, 3);
         font-size   : 20px;
         margin-right: 3px;
+    }
+}
+
+.aHover (@size, @color) {
+    font-size    : @size;
+    text-align   : center;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+    overflow     : hidden;
+    color        : @color;
+    text-overflow: ellipsis;
+}
+
+.isChecked {
+    background-color: extract(@colors, 3);
+    color           : extract(@colors, 4);
+    border          : 1px solid transparent;
+    cursor          : pointer;
+}
+
+.checked() {
+    border: 1px solid #e0e0e0;
+    color : #6e6b6b;
+}
+
+.noChecked {
+    cursor: pointer;
+    .checked();
+
+    &:hover {
+        .icon-checked {
+            display: block !important;
+        }
     }
 }
