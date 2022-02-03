@@ -405,10 +405,10 @@ const deleteDatas: (ids: Array<number>, isShowPrompt: boolean) => void = (
  */
 const deleteCollectDatas: () => void = (): void => {
   switch (prompt.value) {
-    case "是否需要移除此件商品":
+    case "确认移除该件商品？":
       deleteDatas([currentDeleId.value], false);
       break;
-    case `是否需要移除该${currSelectIds.length}件商品`:
+    case `确认移除该${currSelectIds.length}件商品？`:
       deleteDatas(currSelectIds, true);
       break;
   }
