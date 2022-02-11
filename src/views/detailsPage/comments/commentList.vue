@@ -188,7 +188,6 @@ const hideReplayComment: (id: number) => void = (id: number): void => {
   const commentList: Array<Comments> = store.state.CommentModule.commentList;
   commentList[commentList.findIndex((item) => item.id === id)].showReplay =
     false;
-  store.commit("CommentModule/isShowReplaies", { id, show: false });
 };
 /**
  * 观察回复评论的第六条评论(主要作用是用来显示还是关闭收起评论按钮)
