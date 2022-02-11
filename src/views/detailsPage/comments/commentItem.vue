@@ -121,7 +121,7 @@ const emits = defineEmits<{
     type: number,
     name: string,
     fatherId: number,
-    id: number,
+    id: number
   ): void; // 回复评论
 }>();
 
@@ -154,10 +154,8 @@ const showReplayComments: (item: Comments, id: number) => void = (
   id: number
 ): void => {
   if (item.loading) return;
-  if (item.showReplay) {
-    item.showReplay = false;
-    store.commit("CommentModule/isShowReplaies", { id, show: false });
-  } else {
+  if (item.showReplay) item.showReplay = false;
+  else {
     // 如果该一级评论有二级评论的话则向后端请求二级评论数据
     if (!item.replay.length || item.replayStatus === 1) {
       item.loading = true;
